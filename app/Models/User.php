@@ -22,6 +22,10 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function posts() {
+        return $this->belongsTo(Post::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
