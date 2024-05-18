@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Category;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 
@@ -13,7 +15,10 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        return view("allPosts", [
+            "posts" => Post::latest()->get(),
+            "categories" => Category::all(),
+        ]);
     }
 
     /**
@@ -37,7 +42,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return view("post", [
+            "post" => $post
+        ]);
     }
 
     /**

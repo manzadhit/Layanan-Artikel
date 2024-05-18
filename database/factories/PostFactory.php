@@ -26,7 +26,7 @@ class PostFactory extends Factory
             },
             'title' => $title,
             'slug' => Str::slug($title), 
-            'content' => $this->faker->paragraph,
+            'content' => $this->faker->paragraphs(5, true),
         ];
     }
 }
