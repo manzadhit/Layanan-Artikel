@@ -9,6 +9,13 @@ class Category extends Model
 {
     use HasFactory;
 
+    // protected $with = ["posts"];
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     public function posts() {
         return $this->belongsToMany(Post::class)->withTimestamps();
     }

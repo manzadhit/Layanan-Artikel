@@ -37,7 +37,10 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        return view("allPosts", [
+            "categories" => Category::all(),
+            "posts" => $category->posts
+        ]);
     }
 
     /**
