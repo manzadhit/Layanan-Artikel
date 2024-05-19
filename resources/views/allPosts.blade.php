@@ -3,12 +3,12 @@
 @section('container')
     <div class="container">
         <div class="d-flex mb-3 border-bottom">
-            <div class="me-5 pb-3 {{ Request::is('posts') ? 'border-bottom border-black' : '' }}" style="margin-bottom: -1px">
+            <div class="me-5 pb-3 {{ Request::is('posts') ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
                 <a href="/posts" class="nav-link">For you</a>
             </div>
 
             @foreach ($categories as $category)
-                <div class="me-5  {{ Request::is('category/' . $category->slug) ? 'border-bottom border-black' : '' }}" style="margin-bottom: -1px">
+                <div class="me-5  {{ Request::is('category/' . $category->slug) ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
                     <a class="nav-link" aria-current="page"
                         href="/category/{{ $category->slug }}">{{ $category->name }}</a>
                 </div>
@@ -25,7 +25,7 @@
                         <p class="card-text">{{ Str::limit($post->content, 300, '...') }}</p>
                         <a href="/post/{{ $post->slug }}" class="btn btn-primary">Read more</a>
 
-                        <div class="d-flex mt-2">
+                        <div class="d-flex mt-3">
                             @foreach ($post->categories as $category)
                                 <div class="bg-body-secondary px-3 rounded-pill py-1 me-3">
                                     {{ $category->name }}
