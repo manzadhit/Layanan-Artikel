@@ -2,17 +2,19 @@
 
 @section('container')
     <div class="container">
-        <h3>Halaman Post</h3>
         <div class="d-flex mb-3 border-bottom">
-            <div class="me-5 p-2 border-bottom">
-                <a href="/posts">For you</a>
+            <div class="me-5 pb-3 {{ Request::is('posts') ? 'border-bottom border-black' : '' }}" style="margin-bottom: -1px">
+                <a href="/posts" class="nav-link">For you</a>
             </div>
+
             @foreach ($categories as $category)
-                <div class="me-5 p-2 border-bottom">
-                    <a href="/category/{{ $category->slug }}">{{ $category->name }}</a>
+                <div class="me-5  {{ Request::is('category/' . $category->slug) ? 'border-bottom border-black' : '' }}" style="margin-bottom: -1px">
+                    <a class="nav-link" aria-current="page"
+                        href="/category/{{ $category->slug }}">{{ $category->name }}</a>
                 </div>
             @endforeach
         </div>
+
         @if ($posts->count())
             @foreach ($posts as $post)
                 <div class="card w-100 mb-3">
@@ -32,7 +34,7 @@
                         </div>
                     </div>
                 </div>
-            @endforeach   
+            @endforeach
         @else
             <p class="text-center">No post found</p>
         @endif

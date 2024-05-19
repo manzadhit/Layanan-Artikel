@@ -11,7 +11,7 @@
 
 <body>
         {{-- Navbar --}}
-    <nav class="navbar navbar-expand-lg bg-body-tertiary mb-3">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary mb-3 border-bottom">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Kelompok 6</a>
             <div class="collapse navbar-collapse ms-5" id="navbarSupportedContent">
