@@ -13,21 +13,28 @@
                 </div>
             @endforeach
         </div>
-        @foreach ($posts as $post)
-            <div class="card w-75 mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">{{ $post->title }}</h5>
-                    <p>At Category
-                        @foreach ($post->categories as $category)
-                            {{ $category->name }}{{ !$loop->last ? ',' : '' }}
-                        @endforeach
-                    </p>
-                    <p>By. {{ $post->user->name }}. <small class="text-secondary">
-                            {{ \Carbon\Carbon::parse($post->created_at)->format('M d, Y') }}</small></p>
-                    <p class="card-text">{{ Str::limit($post->content, 300, '...') }}</p>
-                    <a href="/post/{{ $post->slug }}" class="btn btn-primary">Read more</a>
+        @if ($posts->count())
+            @foreach ($posts as $post)
+                <div class="card w-100 mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ $post->title }}</h5>
+                        <p>By. {{ $post->user->name }}. <small class="text-secondary">
+                                {{ $post->created_at->diffForHumans() }}</small></p>
+                        <p class="card-text">{{ Str::limit($post->content, 300, '...') }}</p>
+                        <a href="/post/{{ $post->slug }}" class="btn btn-primary">Read more</a>
+
+                        <div class="d-flex mt-2">
+                            @foreach ($post->categories as $category)
+                                <div class="bg-body-secondary px-3 rounded-pill py-1 me-3">
+                                    {{ $category->name }}
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
-            </div>
-        @endforeach
+            @endforeach   
+        @else
+            <p class="text-center">No post found</p>
+        @endif
     </div>
 @endsection

@@ -15,8 +15,8 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Kelompok 6</a>
             <div class="collapse navbar-collapse ms-5" id="navbarSupportedContent">
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex" role="search" action="/posts">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search" value="{{ request("search") }}">
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </div>

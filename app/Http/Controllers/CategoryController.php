@@ -39,7 +39,7 @@ class CategoryController extends Controller
     {
         return view("allPosts", [
             "categories" => Category::all(),
-            "posts" => $category->posts
+            "posts" => $category->posts()->latest()->get()
         ]);
     }
 
