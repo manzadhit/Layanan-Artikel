@@ -3,16 +3,16 @@
 @section('container')
     <div class="container">
         <div class="d-flex mb-3 border-bottom">
-            <div class="me-5 pb-3 {{ Request::is('posts') ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
+            <div class="me-5 pb-3 {{ Request::is('posts') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
                 <a href="/posts" class="nav-link">For you</a>
             </div>
 
             @foreach ($categories as $category)
-                <div class="me-5  {{ Request::is('category/' . $category->slug) ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
+                <div class="me-5  {{ request('category') == $category->slug ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
                     <a class="nav-link" aria-current="page"
-                        href="/category/{{ $category->slug }}">{{ $category->name }}</a>
+                        href="/posts?category={{ $category->slug }}">{{ $category->name }}</a>
                 </div>
-            @endforeach
+            @endforeach 
         </div>
 
         @if ($posts->count())

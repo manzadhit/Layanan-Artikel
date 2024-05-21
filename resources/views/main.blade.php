@@ -16,6 +16,9 @@
             <a class="navbar-brand" href="#">Kelompok 6</a>
             <div class="collapse navbar-collapse ms-5" id="navbarSupportedContent">
                 <form class="d-flex" role="search" action="/posts">
+                    @if (request("category"))
+                        <input type="hidden" name="category" value="{{ request('category') }}">
+                    @endif
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search" value="{{ request("search") }}">
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
