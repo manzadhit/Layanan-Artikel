@@ -1,73 +1,58 @@
 <?php
 
+// app/Http/Controllers/PostController.php
 namespace App\Http\Controllers;
 
-use App\Models\Post;
 use App\Models\Category;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdatePostRequest;
+use App\Models\Post;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view("allPosts", [
-            "posts" => Post::latest()->filter(request(["search", "category"]))->get(),
-            "categories" => Category::all(),
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('posts.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorePostRequest $request)
+    public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Post $post)
-    {
-        return view("post", [
-            "post" => $post
+        $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required',
+            'categories' => 'required|array'
         ]);
+
+        $post = Post::create([
+            'user_id' => auth()->id(),
+            'title' => $request->title,
+            'slug' => Str::slug($request->title),
+            'content' => $request->content,
+        ]);
+
+        $post->categories()->sync($request->categories);
+
+        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
+    public function index(Request $request)
     {
-        //
+        $categories = Category::all();
+        $posts = Post::query()
+            ->filter($request->only(['search', 'category', 'author'])) // Menggunakan scopeFilter() untuk filter
+            ->latest()
+            ->get();
+
+        return view('posts.index', compact('posts', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePostRequest $request, Post $post)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post)
+    public function show($slug)
     {
-        //
+        $post = Post::where('slug', $slug)->firstOrFail();
+        return view('posts.show', compact('post'));
     }
 }
+
+

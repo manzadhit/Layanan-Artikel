@@ -1,10 +1,14 @@
-@extends('main')
+@extends('../template')
 
-@section('container')
+@section('title', 'All Posts')
+
+@extends('../partials/navbar')
+
+@section('content')
     <div class="container">
         <div class="d-flex mb-3 border-bottom">
-            <div class="me-5 pb-3 {{ Request::is('posts') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
-                <a href="/posts" class="nav-link">For you</a>
+            <div class="me-5 pb-3 {{ Request::is('/') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}" style="margin-bottom: -1px">
+                <a href="/" class="nav-link">For you</a>
             </div>
 
             @foreach ($categories as $category)
@@ -20,10 +24,10 @@
                 <div class="card w-100 mb-3">
                     <div class="card-body">
                         <h5 class="card-title">{{ $post->title }}</h5>
-                        <p>By. {{ $post->user->name }}. <small class="text-secondary">
+                        <p>By. <a class="text-decoration-none" href="/posts?author={{ $post->user->name }}">{{ $post->user->name }}</a>. <small class="text-secondary">
                                 {{ $post->created_at->diffForHumans() }}</small></p>
                         <p class="card-text">{{ Str::limit($post->content, 300, '...') }}</p>
-                        <a href="/post/{{ $post->slug }}" class="btn btn-primary">Read more</a>
+                        <a href="/posts/{{ $post->slug }}" class="btn btn-primary">Read more</a>
 
                         <div class="d-flex mt-3">
                             @foreach ($post->categories as $category)

@@ -11,6 +11,8 @@ class Post extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['user_id', 'title', 'slug', 'content'];
+
     protected $with = ["user", "categories"];
 
     public function getRouteKeyName()
@@ -40,6 +42,12 @@ class Post extends Model
         if(isset($filters["category"])) {
             $query->whereHas("categories", function($query) use($filters) {
                 $query->where("slug", $filters["category"]);
+            });
+        }
+
+        if(isset($filters["author"])) {
+            $query->whereHas("user", function ($query) use ($filters) {
+                $query->where("users.name", "like", "%" . $filters["author"] . "%");
             });
         }
 

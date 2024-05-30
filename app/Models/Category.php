@@ -9,7 +9,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    // protected $with = ["posts"];
+    protected $fillable = ['name', 'slug'];
 
     public function getRouteKeyName()
     {
