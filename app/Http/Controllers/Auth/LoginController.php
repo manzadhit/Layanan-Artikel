@@ -22,7 +22,7 @@ class LoginController extends Controller
         // Coba untuk login
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
             // Redirect ke halaman /posts setelah berhasil login
-            return redirect('/posts');
+            return redirect('/');
         }
 
         // Jika gagal login, kembali ke halaman login dengan error

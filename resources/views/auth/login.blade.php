@@ -3,12 +3,12 @@
 @section('title', 'Login')
 
 @section('content')
-<section class="p-3 p-md-4 h d-flex justify-content-center align-items-center" style="height: 100vh">
+<section class="p-3 p-md-4 h d-flex justify-content-center align-items-center" style="height: 93vh">
   <div class="container">
     <div class="card border-light-subtle shadow-sm">
-      <div class="row g-0">
+      <div class="row g-0 d-flex align-items-center">
         <div class="col-12 col-md-6">
-          <div class="card-body p-3 p-md-4 p-xl-5">
+          <div class="card-body card-body-fluid p-3 p-md-4 p-xl-5">
             <div class="row">
               <div class="col-12">
                 <div class="mb-3">
@@ -35,12 +35,6 @@
                   @enderror
                 </div>
                 <div class="col-12">
-                  <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="remember" id="remember">
-                    <label for="remember" class="form-check-label">Remember Me</label>
-                  </div>
-                </div>
-                <div class="col-12">
                   <div class="d-grid">
                     <button class="btn bsb-btn-xl btn-primary" type="submit">Login</button>
                   </div>
@@ -50,12 +44,12 @@
             <div class="row">
               <div class="col-12">
                 <hr class="mt-2 mb-4 border-secondary-subtle">
-                <p class="m-0 text-secondary text-center">Don't have an account? <a href="{{ route('register') }}" class="link-primary text-decoration-none">Register</a></p>
+                <p class="mb-0 text-secondary text-center">Don't have an account? <a href="{{ route('register') }}" class="link-primary text-decoration-none">Register</a></p>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-6 ">
+        <div class="col">
             <img src="{{ asset('img/trendzine.jpg') }}" alt="Trendzine" class="card-img-top h-100" >
         </div>
       </div>

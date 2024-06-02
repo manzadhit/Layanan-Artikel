@@ -24,7 +24,7 @@ class RegisterController extends Controller
         $user = $this->create($request->all());
 
         // Redirect ke halaman home setelah berhasil registrasi
-        return redirect('/login');
+        return redirect('/');
     }
 
     protected function validator(array $data)

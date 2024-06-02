@@ -4,7 +4,7 @@
     }
 </style>
 
-<nav class="navbar navbar-expand-lg mb-3 border-bottom sticky-top bg-white">
+<nav class="navbar navbar-expand-lg mb-3 px-4 sticky-top bg-white">
     <div class="container-fluid align-items-center">
         <div class="d-flex align-items-center">
             <a href="/" class="d-flex align-items-center gap-3 text-decoration-none me-3">
@@ -28,8 +28,8 @@
                 </form>
             </div>
         </div>
-        <div class="d-flex gap-5">
-            <a class="ms-3 text-decoration-none d-flex gap-2 align-items-center" style="cursor: pointer; color: #6B6B6B"
+        <div class="d-flex gap-3">
+            <a class="text-decoration-none d-flex gap-2 align-items-center" style="cursor: pointer; color: #6B6B6B"
                 href="{{ route('posts.create') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                     class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -40,9 +40,9 @@
                 </svg>
                 <p class="m-0">Write</p>
             </a>
-            <div class="dropdown profile-menu">
+            <div class="dropdown profile-menu rounded-pill">
                 <div class="profile-button">
-                    <button class="btn bg-primary border-fill" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                    <button class="btn bg-primary rounded-pill w-100 text-light" type="button" id="dropdownMenuButton" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
                         A
                     </button>
