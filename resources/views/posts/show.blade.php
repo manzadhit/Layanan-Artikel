@@ -109,7 +109,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="m-0">{{ $comments->count() }}</p>
+                        <p class="m-0">{{ $post->comments->count() }}</p>
                     </div>
                 </div>
                 <div class="d-flex gap-4">
