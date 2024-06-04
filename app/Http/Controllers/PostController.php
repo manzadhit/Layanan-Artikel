@@ -3,10 +3,13 @@
 // app/Http/Controllers/PostController.php
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\Like;
 use App\Models\Post;
-use Illuminate\Http\Request;
+use App\Models\Comment;
+use App\Models\Category;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class PostController extends Controller
 {
@@ -51,8 +54,16 @@ class PostController extends Controller
     public function show($slug)
     {
         $post = Post::where('slug', $slug)->firstOrFail();
-        return view('posts.show', compact('post'));
+        $comments = Comment::query()->latest()->get();;
+        return view('posts.show', compact('post', 'comments'));
+    }
+
+    public function likePost(Request $request, $postId)
+    {
+        $post = Post::findOrFail($postId);
+        $like = new Like(['user_id' => $request->user()->id]);
+        $post->likes()->save($like);
+
+        return response()->json(['message' => 'Post liked!']);
     }
 }
-
-

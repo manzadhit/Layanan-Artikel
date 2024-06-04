@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ImageController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
 // Rute untuk registrasi
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
@@ -28,3 +31,9 @@ Route::get('/', [PostController::class, 'index'])->name('home');
 
 // Rute untuk menampilkan semua postingan dan kategori
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+Route::post('ckeditor/upload', [ImageController::class, 'upload'])->name('ckeditor.upload');
+
+Route::post('/posts/{postId}/toggle-like', [LikeController::class, 'toggleLike'])->middleware('auth');
+
+Route::post('/posts/{postId}/comment', [CommentController::class, 'addComment'])->middleware('auth')->name("comment.store");
+Route::delete('/comments/{commentId}', [CommentController::class, 'deleteComment'])->middleware('auth')->name("comment.delete");
