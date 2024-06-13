@@ -139,8 +139,10 @@ class PostController extends Controller
             ->exists();
         $user = Auth::user();
 
+        $isSaved = $post->savedByUsers()->where('user_id', auth()->id())->exists();
 
-        return view('posts.show', compact('post', 'comments', 'isLiked', 'user'));
+
+        return view('posts.show', compact('post', 'comments', 'isLiked', 'user', 'isSaved'));
     }
 
 

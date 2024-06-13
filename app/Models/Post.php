@@ -50,6 +50,12 @@ class Post extends Model
         return $this->hasMany(PostImage::class);
     }
 
+    // Relasi untuk post yang disimpan
+    public function savedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'saved_posts', 'post_id', 'user_id');
+    }
+
 
     public function scopeFilter($query, array $filters)
     {

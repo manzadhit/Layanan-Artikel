@@ -23,7 +23,8 @@ class User extends Authenticatable
     ];
 
 
-    public function posts() {
+    public function posts()
+    {
         return $this->hasMany(Post::class);
     }
 
@@ -50,6 +51,11 @@ class User extends Authenticatable
     public function followers()
     {
         return $this->belongsToMany(User::class, 'follows', 'followed_user_id', 'user_id');
+    }
+
+    public function savedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'saved_posts', 'user_id', 'post_id');
     }
 
     /**

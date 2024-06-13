@@ -8,6 +8,7 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 
@@ -46,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
   Route::post('/toggle-follow/{userId}', [FollowController::class, 'toggleFollow'])->name('toggle.follow');
 
   Route::get('profile', [ProfileController::class, 'index'])->name("profile");
+
+  Route::post('/toggle-save', [SavedPostController::class, 'toggleSave'])->name('toggle.save');
 });
 
 // Rute untuk menampilkan postingan berdasarkan slug
