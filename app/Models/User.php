@@ -22,6 +22,7 @@ class User extends Authenticatable
         'password',
     ];
 
+
     public function posts() {
         return $this->hasMany(Post::class);
     }
@@ -34,6 +35,21 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function isFollowing(User $user)
+    {
+        return $this->following()->where('followed_user_id', $user->id)->exists();
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'user_id', 'followed_user_id');
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followed_user_id', 'user_id');
     }
 
     /**

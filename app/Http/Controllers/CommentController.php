@@ -33,6 +33,27 @@ class CommentController extends Controller
         return redirect()->back()->with('success', 'Comment added!')->with('comment_added', true);
     }
 
+    public function editComment(Request $request, $commentId)
+    {
+        $comment = Comment::findOrFail($commentId);
+
+        // Cek apakah user adalah pemilik comment
+        if ($comment->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized!'], 403);
+        }
+
+        // Validasi data
+        $request->validate([
+            'content' => 'required|string|max:255',
+        ]);
+
+        // Update comment
+        $comment->content = $request->content;
+        $comment->save();
+
+        return redirect()->back()->with('success', 'Comment updated!');
+    }
+
     // Menghapus comment dari post
     public function deleteComment(Request $request, $commentId)
     {

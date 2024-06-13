@@ -13,7 +13,7 @@ class Post extends Model
 
     protected $fillable = ['user_id', 'title', 'slug', 'content'];
 
-    protected $with = ["user", "categories"];
+    protected $with = ["user", "categories", 'likes', 'comments'];
 
     public function getRouteKeyName()
     {
@@ -43,6 +43,11 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function postImages()
+    {
+        return $this->hasMany(PostImage::class);
     }
 
 
