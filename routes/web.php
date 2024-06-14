@@ -35,8 +35,7 @@ Route::middleware(['auth'])->group(function () {
   // Rute untuk menghapus post
   Route::delete('/posts/{slug}', [PostController::class, 'destroy'])->name('posts.destroy');
 
-  Route::post('/posts/upload-image', [PostController::class, 'uploadImage'])->name('posts.upload-image')->middleware('auth');
-
+  Route::post('/posts/upload-image', [ImageController::class, 'uploadImage'])->name('posts.upload-image');
 
   Route::post('/toggle-like', [LikeController::class, 'toggleLike'])->name('toggle.like');
 

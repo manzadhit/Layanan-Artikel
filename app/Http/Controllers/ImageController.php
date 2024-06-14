@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ImageController extends Controller
 {
-    public function upload(Request $request)
+    public function uploadImage(Request $request)
     {
         $request->validate([
             'upload' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -18,9 +18,10 @@ class ImageController extends Controller
 
         $image = $request->file('upload');
         $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-        $image->storeAs('public/images', $imageName);
+        $image->move(public_path('images'), $imageName);
 
-        // Kembalikan URL gambar yang diunggah untuk penggunaan di editor
-        return response()->json(['url' => asset('storage/images/' . $imageName)]);
+        return response()->json([
+            'url' => asset('images/' . $imageName),
+        ]);
     }
 }

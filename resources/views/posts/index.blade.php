@@ -13,9 +13,9 @@
 
 @section('content')
     <div class="container">
-        <div class="d-flex mb-3 border-bottom">
-            <div class="me-5 pb-3 {{ Request::is('/') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
-                style="margin-bottom: -1px">
+        <div class="d-flex mb-3 pt-4 border-bottom mx-auto" >
+            <div class="me-5 pb-3  {{ Request::is('/') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
+                style="margin-bottom: -1px;">
                 <a href="/" class="nav-link">For you</a>
             </div>
 
@@ -27,8 +27,6 @@
                 </div>
             @endforeach
         </div>
-
-
         @if ($posts->count())
             <div class="col-10 mt-4 mx-auto">
                 @foreach ($posts as $post)

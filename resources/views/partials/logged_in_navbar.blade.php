@@ -4,7 +4,7 @@
     }
 </style>
 
-<nav class="navbar navbar-expand-lg mb-3 px-4 sticky-top bg-white">
+<nav class="navbar navbar-expand-lg px-4 sticky-top bg-white border border-bottom">
     <div class="container-fluid align-items-center">
         <div class="d-flex align-items-center">
             <a href="/" class="d-flex align-items-center gap-3 text-decoration-none me-3">
@@ -50,7 +50,7 @@
                     aria-expanded="false" style="width: 40px; height: 40px">
                     <span class="position-absolute fs-5 text" style="top: 1; left: 13.5">{{ $user->name[0] }}</span>
                 </div>
-                <ul class="dropdown-menu dropdown-menu-end">
+                <ul class="dropdown-menu dropdown-menu-end z-1">
                     <li>
                         <a class="m-0 text-decoration-none" id="profile-form" href="{{ route('profile') }}">
                             @csrf
