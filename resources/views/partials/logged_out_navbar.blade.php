@@ -1,6 +1,9 @@
 <nav class="navbar navbar-expand-lg mb-3 px-4 sticky-top bg-white">
     <div class="container-fluid align-items-center">
-        <a href="/" class="navbar-brand m-0 fw-semibold">TrendZine</a>
+        <a href="/" class="d-flex align-items-center gap-3 text-decoration-none me-3">
+            <img class="rounded-circle" style="width: 1.8rem" src="{{ asset('img/trendzine.jpg') }}" alt="">
+            <p class="navbar-brand m-0 mb-1 fw-semibold">TrendZine</p>
+        </a>
         <div class="d-flex gap-3">
             <a class="text-decoration-none d-flex gap-2 align-items-center" style="cursor: pointer; color: #6B6B6B"
                 href="{{ route('login') }}">

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LikeController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+
+// URL::forceScheme('https');
 
 // Rute untuk registrasi
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
@@ -45,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
 
   Route::post('/toggle-follow/{userId}', [FollowController::class, 'toggleFollow'])->name('toggle.follow');
 
-  Route::get('profile', [ProfileController::class, 'index'])->name("profile");
+  Route::get('profile/{username}/{menu?}', [ProfileController::class, 'index'])->name("profile");
 
   Route::post('/toggle-save', [SavedPostController::class, 'toggleSave'])->name('toggle.save');
 });

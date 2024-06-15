@@ -1,14 +1,32 @@
 @extends('../template')
 
-@include('partials.logged_in_navbar', ['user' => $user])
+@section('title', 'Profile - TrendZine')
+
+@include('partials.logged_in_navbar', ['user' => $user_login])
+
+@section('styles')
+    <style>
+        .underline-hover {
+            text-decoration: none;
+            /* Menghilangkan garis bawah */
+            transition: text-decoration 0.3s ease;
+            /* Efek transisi */
+        }
+
+        .underline-hover:hover {
+            text-decoration: underline;
+            /* Menambah garis bawah saat dihover */
+        }
+    </style>
+@endsection
 
 
 @section('content')
     <div class="d-flex h-100 w-100 row">
         {{-- all post info --}}
-        <div class="col-8 border-end-0 d-flex flex-column pe-5 pt-5">
+        <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
             <div class="d-flex justify-content-between align-items-center ">
-                <h1 class="m-0">Nyoman</h1>
+                <h1 class="m-0">{{ $user->name }}</h1>
                 <svg data-bs-toggle="dropdown" width="24" height="24" style="cursor: pointer" viewBox="0 0 24 24"
                     fill="none">
                     <path fill-rule="evenodd" clip-rule="evenodd"
@@ -19,24 +37,32 @@
             {{-- menu --}}
             <div class="mt-4">
                 <div class="d-flex mb-4 border-bottom">
-                    <div class="me-5 pb-3" style="margin-bottom: -1px; font-size: .95rem">
-                        <a href="/" class="nav-link">For you</a>
+                    <div class="me-5 pb-3 {{ $menu === 'all' || $menu === null ? 'border-bottom border-black' : '' }}"
+                        style="margin-bottom: -1px; font-size: .95rem">
+                        <a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
+                            class="nav-link">All Posts</a>
                     </div>
-                    <div class="me-5 pb-3" style="margin-bottom: -1px">
-                        <a href="/" class="nav-link">For you</a>
+                    <div class="me-5 pb-3 {{ $menu === 'saved' ? 'border-bottom border-black' : '' }}"
+                        style="margin-bottom: -1px">
+                        <a href="{{ route('profile', ['username' => $user->username, 'menu' => 'saved']) }}"
+                            class="nav-link">Saved Posts</a>
                     </div>
-                    <div class="me-5 pb-3" style="margin-bottom: -1px">
-                        <a href="/" class="nav-link">For you</a>
+                    <div class="me-5 pb-3 {{ $menu === 'liked' ? 'border-bottom border-black' : '' }}"
+                        style="margin-bottom: -1px">
+                        <a href="{{ route('profile', ['username' => $user->username, 'menu' => 'liked']) }}"
+                            class="nav-link">Liked Posts</a>
                     </div>
                 </div>
             </div>
+
+
             {{-- all post --}}
             @if ($posts->count())
-                <div class="mx-auto">
+                <div class="w-100">
                     @foreach ($posts as $post)
                         <div class="card w-100 mb-5 border-0">
                             <div class="card-body d-flex gap-2 p-0">
-                                <div class="col-9">
+                                <div class="col-9 me-3">
                                     <p class="mb-2">
                                         <a class="text-decoration-none text-dark"
                                             href="/posts?author={{ $post->user->name }}">{{ $post->user->name }}</a>.
@@ -59,11 +85,89 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                        <svg class="me-5" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-                                            <path
-                                                d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
-                                        </svg>
+                                        <div class=" d-flex gap-2 me-2">
+                                            {{-- saved form --}}
+                                            @if (auth()->check())
+                                                <form class="m-0 saveForm" data-post-id="{{ $post->id }}">
+                                                    @csrf
+                                                    <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                                    <button type="button" class="save-button"
+                                                        data-saved="{{ $post->isSaved ? 'true' : 'false' }}"
+                                                        style="background: none; border: none; cursor: pointer;">
+                                                        <!-- SVG code here -->
+                                                        <svg width="24" height="24" viewBox="0 0 24 24"
+                                                            fill="none" class="{{ $post->isSaved ? 'ajw' : 'lm' }}">
+                                                            <path
+                                                                d="{{ $post->isSaved
+                                                                    ? 'M7.5 3.75a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-14a2 2 0 0 0-2-2h-9z'
+                                                                    : 'M17.5 1.25a.5.5 0 0 1 1 0v2.5H21a.5.5 0 0 1 0 1h-2.5v2.5a.5.5 0 0 1-1 0v-2.5H15a.5.5 0 0 1 0-1h2.5v-2.5zm-11 4.5a1 1 0 0 1 1-1H11a.5.5 0 0 0 0-1H7.5a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-8.5a.5.5 0 0 0-1 0v7.48l-5.2-4a.5.5 0 0 0-.6 0l-5.2 4V5.75z' }}"
+                                                                fill="#000"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            {{-- other form --}}
+                                            @if (auth()->check())
+                                                <div class="dropdown">
+                                                    <svg id="report-button" data-bs-toggle="dropdown" width="24"
+                                                        height="24" style="cursor: pointer" viewBox="0 0 24 24"
+                                                        fill="none">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                                            d="M4.39 12c0 .55.2 1.02.59 1.41.39.4.86.59 1.4.59.56 0 1.03-.2 1.42-.59.4-.39.59-.86.59-1.41 0-.55-.2-1.02-.6-1.41A1.93 1.93 0 0 0 6.4 10c-.55 0-1.02.2-1.41.59-.4.39-.6.86-.6 1.41zM10 12c0 .55.2 1.02.58 1.41.4.4.87.59 1.42.59.54 0 1.02-.2 1.4-.59.4-.39.6-.86.6-1.41 0-.55-.2-1.02-.6-1.41a1.93 1.93 0 0 0-1.4-.59c-.55 0-1.04.2-1.42.59-.4.39-.58.86-.58 1.41zm5.6 0c0 .55.2 1.02.57 1.41.4.4.88.59 1.43.59.57 0 1.04-.2 1.43-.59.39-.39.57-.86.57-1.41 0-.55-.2-1.02-.57-1.41A1.93 1.93 0 0 0 17.6 10c-.55 0-1.04.2-1.43.59-.38.39-.57.86-.57 1.41z"
+                                                            fill="currentColor"></path>
+                                                    </svg>
+                                                    <ul class="dropdown-menu p-2" id="report-dropdown"
+                                                        style="min-width: 150px; font-size: .95rem">
+                                                        @if (auth()->check() && auth()->id() == $post->user->id)
+                                                            <li>
+                                                                <a class="m-0 text-decoration-none" id="profile-form"
+                                                                    href="{{ route('posts.edit', ['slug' => $post->slug]) }}">
+                                                                    @csrf
+                                                                    <button type="submit"
+                                                                        class="dropdown-item d-flex align-items-center text-center">
+                                                                        Edit post
+                                                                    </button>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <form action="{{ route('posts.destroy', $post->slug) }}"
+                                                                    method="POST" class="mb-0">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="dropdown-item d-flex align-items-center text-danger"
+                                                                        onclick="return confirm('Anda yakin ingin menghapus post ini?')">Delete
+                                                                        post</button>
+                                                                </form>
+                                                            </li>
+                                                        @else
+                                                            <li>
+                                                                <form class="m-0 d-flex align-items-center text-center"
+                                                                    id="follow-form">
+                                                                    @csrf
+                                                                    <input type="hidden" name="followed_user_id"
+                                                                        value="{{ $post->user ? $post->user->id : '' }}">
+                                                                    <button type="button" id="followBtn"
+                                                                        class="follow-btn dropdown-item d-flex align-items-center text-center text"
+                                                                        style="cursor: pointer;"
+                                                                        data-following="{{ auth()->user()->isFollowing($post->user)? 'true': 'false' }}"
+                                                                        data-user-id="{{ $post->user->id }}">
+                                                                        {{ auth()->user()->isFollowing($post->user)? 'Unfollow author': 'Follow author' }}
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                            <li>
+                                                                <button type="button"
+                                                                    class="dropdown-item d-flex align-items-center text-center text-danger"
+                                                                    id="reportPostBtn">
+                                                                    Report post
+                                                                </button>
+                                                            </li>
+                                                        @endif
+                                                    </ul>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-3 d-flex align-items-center">
@@ -73,7 +177,12 @@
                                             $image = $post->postImages->first(); // Ambil objek gambar pertama
                                         @endphp
                                         <img src="{{ asset('images/' . $image->image_name) }}"
-                                            style="height: 150px; width: 100%" alt="">
+                                            style="height: 150px; width: 100%" alt="{{ $post->title }}">
+                                    @else
+                                        {{-- Placeholder jika tidak ada gambar --}}
+                                        <img src="https://picsum.photos/seed/picsum/200/300
+"
+                                            style="height: 150px; width: 100%" alt="Placeholder Image">
                                     @endif
                                 </div>
 
@@ -87,13 +196,39 @@
             @endif
         </div>
         {{-- profile info --}}
-        <div class="col-4 p-5">
+        <div class="col-4 pt-5 ps-5">
             {{-- profile name --}}
-            <div class="btn btn-secondary rounded-circle position-relative" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false" style="width: 70px; height: 70px">
-                <p class="m-0 display-5 text-center position-absolute top-50 start-50 translate-middle"
-                    style="bottom: -35px">{{ $user->name[0] }}
-                </p>
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="btn border-0 btn-secondary rounded-circle position-relative" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"
+                    style="width: 70px; height: 70px; background-color: {{ $user->profile_color }}">
+                    <p class="display-5 h-100 text-center position-absolute top-50 start-50 translate-middle">
+                        {{ $user->name[0] }}
+                    </p>
+                </div>
+                <form class="m-0" id="follow-form">
+                    @csrf
+                    <input type="hidden" name="followed_user_id" value="{{ $user ? $user->id : '' }}">
+                    <div class="p-0 m-0">
+                        @if (auth()->check())
+                            @if (auth()->id() != $user->id)
+                                <button type="button" id="followBtn"
+                                    class="follow-btn rounded-pill {{ auth()->user()->isFollowing($user) ?  'border-success text-success' : 'btn-success'}} btn"
+                                    style="cursor: pointer;"
+                                    data-following="{{ auth()->user()->isFollowing($user) ? 'true' : 'false' }}"
+                                    data-user-id="{{ $user->id }}">
+                                    {{ auth()->user()->isFollowing($user) ? 'Following' : 'Follow' }}
+                                </button>
+                            @endif
+                        @else
+                            .<button type="button" id="loginToFollowBtn"
+                                class="text-success text-decoration-none border-0 bg-transparent"
+                                style="cursor: pointer;">
+                                Login to Follow
+                            </button>
+                        @endif
+                    </div>
+                </form>
             </div>
             <p class="fw-semibold mt-2 mb-1">
                 {{ $user->name }}
@@ -103,24 +238,28 @@
                 {{ $user->followers()->count() }} Followers
             </p>
 
-            <a href="$" class="text-decoration-none text-success" style="cursor: pointer">
-                Edit profile
-            </a>
+            @if (auth()->check() && auth()->id() == $user->id)
+                <a href="$" class="text-decoration-none text-success" style="cursor: pointer">
+                    Edit profile
+                </a>
+            @endif
 
             {{-- following --}}
             <div>
                 <p class="fw-semibold mt-2 mb-3 mt-4">Following</p>
                 @foreach ($followedUsers as $follow)
                     <div class="d-flex gap-2">
-                        <div class="btn btn-secondary rounded-circle position-relative" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" style="height: 25px">
+                        <div id="profile-color" class="btn border-0 btn-secondary rounded-circle position-relative"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            style="height: 25px; background-color: {{ $follow->profile_color }}">
                             <span style="font-size: 0.7rem"
                                 class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $follow->name[0] }}
                             </span>
                         </div>
-                        <p style="font-size: 0.9rem">{{ $follow->name }}</p>
-                        <svg class="ms-auto" data-bs-toggle="dropdown" width="24" height="24" style="cursor: pointer"
-                            viewBox="0 0 24 24" fill="none">
+                        <a href="{{ route('profile', ['username' => $follow->username]) }}"
+                            class="mb-2 text-dark underline-hover" style="font-size: 0.9rem">{{ $follow->name }}</a>
+                        <svg class="ms-auto" data-bs-toggle="dropdown" width="24" height="24"
+                            style="cursor: pointer" viewBox="0 0 24 24" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M4.39 12c0 .55.2 1.02.59 1.41.39.4.86.59 1.4.59.56 0 1.03-.2 1.42-.59.4-.39.59-.86.59-1.41 0-.55-.2-1.02-.6-1.41A1.93 1.93 0 0 0 6.4 10c-.55 0-1.02.2-1.41.59-.4.39-.6.86-.6 1.41zM10 12c0 .55.2 1.02.58 1.41.4.4.87.59 1.42.59.54 0 1.02-.2 1.4-.59.4-.39.6-.86.6-1.41 0-.55-.2-1.02-.6-1.41a1.93 1.93 0 0 0-1.4-.59c-.55 0-1.04.2-1.42.59-.4.39-.58.86-.58 1.41zm5.6 0c0 .55.2 1.02.57 1.41.4.4.88.59 1.43.59.57 0 1.04-.2 1.43-.59.39-.39.57-.86.57-1.41 0-.55-.2-1.02-.57-1.41A1.93 1.93 0 0 0 17.6 10c-.55 0-1.04.2-1.43.59-.38.39-.57.86-.57 1.41z"
                                 fill="currentColor"></path>
@@ -132,3 +271,95 @@
 
     </div>
 @endsection
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.save-button', function() {
+                var $button = $(this);
+                var postId = $button.closest('.saveForm').data('post-id');
+                var isSaved = $button.data('saved') === true;
+
+                $.ajax({
+                    url: '{{ url(route('toggle.save')) }}',
+                    type: 'POST',
+                    data: {
+                        post_id: postId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 'saved') {
+                            $button.data('saved', true);
+                            $button.find('svg').attr('class', 'ajw')
+                                .find('path').attr('d',
+                                    'M7.5 3.75a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-14a2 2 0 0 0-2-2h-9z'
+                                );
+                        } else {
+                            $button.data('saved', false);
+                            $button.find('svg').attr('class', 'lm')
+                                .find('path').attr('d',
+                                    'M17.5 1.25a.5.5 0 0 1 1 0v2.5H21a.5.5 0 0 1 0 1h-2.5v2.5a.5.5 0 0 1-1 0v-2.5H15a.5.5 0 0 1 0-1h2.5v-2.5zm-11 4.5a1 1 0 0 1 1-1H11a.5.5 0 0 0 0-1H7.5a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-8.5a.5.5 0 0 0-1 0v7.48l-5.2-4a.5.5 0 0 0-.6 0l-5.2 4V5.75z'
+                                );
+                        }
+
+                        // Tambahkan timeout sebelum reload untuk memberikan waktu pada perubahan visual
+                        setTimeout(function() {
+                            location.reload();
+                        }, 200); // Delay 300ms
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error saving post:", error);
+                        alert("An error occurred while saving the post. Please try again.");
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            // Handler untuk tombol follow
+            $(document).on('click', '.follow-btn', function() {
+                    var btn = $(this);
+                    var isFollowing = btn.data('following') === 'true';
+                    var userId = btn.data('user-id');
+
+                    @auth
+                    var authUserId = {{ auth()->id() }};
+                    $.ajax({
+                        url: "{{ secure_url(route('toggle.follow', ['userId' => ':userId'])) }}"
+                            .replace(':userId', authUserId),
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            followed_user_id: userId
+                        },
+                        success: function(response) {
+                            if (response.isFollowing) {
+                                btn.text('Following').data('following', 'true');
+                            } else {
+                                btn.text('Follow').data('following', 'false');
+                            }
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 200); // Delay 300ms
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText);
+                            alert('An error occurred. Please try again.');
+                        }
+                    });
+                @else
+                    // Jika pengguna belum login, arahkan ke halaman login
+                    window.location.href = "{{ route('login') }}";
+                @endauth
+            });
+
+        // Handler untuk tombol "Login to Follow"
+        $(document).on('click', '#loginToFollowBtn', function() {
+            window.location.href = "{{ route('login') }}";
+        });
+        });
+    </script>
+@endpush

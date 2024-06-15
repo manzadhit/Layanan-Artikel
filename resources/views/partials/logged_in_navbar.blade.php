@@ -46,13 +46,13 @@
             </a>
             <!-- Dropdown Menu -->
             <div class="dropdown-center">
-                <div class="btn btn-secondary rounded-circle text-center position-relative" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false" style="width: 40px; height: 40px">
-                    <span class="position-absolute fs-5 text" style="top: 1; left: 13.5">{{ $user->name[0] }}</span>
+                <div class="btn btn-secondary border-0 rounded-circle text-center position-relative" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false" style="width: 40px; height: 40px; background-color: {{ $user->profile_color }}">
+                    <p class="position-absolute h-100 text top-50 start-50 translate-middle" style="font-size: 1.4rem" >{{ $user->name[0] }}</p>
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end z-1">
                     <li>
-                        <a class="m-0 text-decoration-none" id="profile-form" href="{{ route('profile') }}">
+                        <a class="m-0 text-decoration-none" id="profile-form" href="{{ route('profile', ["username" => $user->username]) }}">
                             @csrf
 
                             <button type="submit" class="dropdown-item d-flex align-items-center">

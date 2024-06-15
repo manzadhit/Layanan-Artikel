@@ -67,9 +67,13 @@ class PostController extends Controller
                 return $text;
             } else {
                 // Jika tidak ada tag <p> yang ditemukan, kembalikan pesan atau nilai default
-                return 'No <p> tag found';
+                return '';
             }
         };
+        // Menambahkan status isSaved untuk setiap post
+        $posts->each(function ($post){
+            $post->isSaved = $post->savedByUsers()->where('user_id', auth()->id())->exists();
+        });
 
         return view('posts.index', compact('posts', 'categories', 'user', 'getFirstTagRegex'));
     }
@@ -152,6 +156,13 @@ class PostController extends Controller
         $dom = new \DomDocument();
         $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
+
+        // Tambahkan kode ini untuk menghapus tag <p>&nbsp;</p>
+        $xpath = new \DOMXPath($dom);
+        $emptyParagraphs = $xpath->query('//p[normalize-space(.)=""]');
+        foreach ($emptyParagraphs as $node) {
+            $node->parentNode->removeChild($node);
+        }
 
         // Get all <figure> elements
         $figures = $dom->getElementsByTagName('figure');

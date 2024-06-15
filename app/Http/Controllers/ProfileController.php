@@ -1,32 +1,55 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Auth;
 
+use App\Models\Like;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function index() {
-        $user = Auth::user();
+    public function index($username, $menu = null)
+    {
+        $user_login = Auth::user();
+        $user = User::where('username', $username)->first();
 
-        // Panggil latest() pada query builder sebelum mengambil koleksi
-        $posts = $user->posts()->latest()->get();
-        // Mendefinisikan fungsi getFirstTagRegex sebagai variabel
+        if (!$user) {
+            abort(404, 'User not found');
+        }
+
+        // Fungsi untuk mengambil teks pertama dalam tag <p>
         $getFirstTagRegex = function ($content) {
             preg_match('/<p>(.*?)<\/p>/s', $content, $matches);
-            // Periksa apakah $matches memiliki kunci indeks 1
             if (isset($matches[1])) {
-                // Menghapus tag <figure> jika ada di dalam teks
-                $text = strip_tags($matches[1]);
-                return $text;
+                return strip_tags($matches[1]);
             } else {
-                // Jika tidak ada tag <p> yang ditemukan, kembalikan pesan atau nilai default
                 return 'No <p> tag found';
             }
         };
-        $followedUsers = $user->following;
 
-        return view('profile/index', compact('user','posts', 'getFirstTagRegex', 'followedUsers'));
+        // Mengambil postingan berdasarkan menu yang dipilih
+        switch ($menu) {
+            case 'saved':
+                $posts = $user->savedPosts()->latest('saved_posts.created_at')->get();
+                break;
+            case 'liked':
+                $posts = $user->likes()->with('post')->latest()->get()->pluck('post');
+                break;
+            default:
+                $posts = $user->posts()->latest()->get();
+                break;
+        }
+
+        // Mengambil daftar pengguna yang diikuti
+        $followedUsers = $user->following;
+        $posts->each(function ($post) {
+            $post->isSaved = $post->savedByUsers()->where('user_id', auth()->id())->exists();
+        });
+
+        return view('profile.index', compact('user_login','user', 'posts', 'menu', 'getFirstTagRegex', 'followedUsers'));
     }
+
 }
