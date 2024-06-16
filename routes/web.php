@@ -12,8 +12,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\NotificationController;
 
-// URL::forceScheme('https');
+URL::forceScheme('https');
 
 // Rute untuk registrasi
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
@@ -48,9 +49,25 @@ Route::middleware(['auth'])->group(function () {
 
   Route::post('/toggle-follow/{userId}', [FollowController::class, 'toggleFollow'])->name('toggle.follow');
 
+  Route::get('/profile/{username}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+  // Route untuk menyimpan perubahan profil
+
+  Route::post('/profile/upload-image', [ProfileController::class, 'uploadImage'])->name('profile.uploadImage');
+  Route::post('/profile/remove-image', [ProfileController::class, 'removeImage'])->name('profile.removeImage');
+
+  Route::post('/profile/{username}/update', [ProfileController::class, 'update'])->name('profile.update');
+
   Route::get('profile/{username}/{menu?}', [ProfileController::class, 'index'])->name("profile");
+  // Route untuk menampilkan halaman edit profil
+
+  Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
 
   Route::post('/toggle-save', [SavedPostController::class, 'toggleSave'])->name('toggle.save');
+
+  // routes/web.php
+  Route::get('{username}/notifications', [NotificationController::class, "index"])->name('notifications');
+
 });
 
 // Rute untuk menampilkan postingan berdasarkan slug

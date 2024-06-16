@@ -10,6 +10,22 @@
     @include('partials.logged_out_navbar')
 @endif
 
+@section('styles')
+    <style>
+        .underline-hover {
+            text-decoration: none;
+            /* Menghilangkan garis bawah */
+            transition: text-decoration 0.3s ease;
+            /* Efek transisi */
+        }
+
+        .underline-hover:hover {
+            text-decoration: underline;
+            /* Menambah garis bawah saat dihover */
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="container">
         <div class="d-flex mb-3 pt-4 border-bottom mx-auto">
@@ -32,19 +48,31 @@
                     <div class="card w-100 mb-3 border-0">
                         <div class="card-body d-flex gap-2">
                             <div class="col-9 me-4">
-                                <div class="d-flex gap-2">
-                                    <div id="profile-color"
-                                        class="btn border-0 btn-secondary rounded-circle position-relative" type="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false"
-                                        style="height: 25px; background-color: {{ $post->user->profile_color }}">
-                                        <span style="font-size: 0.7rem"
-                                            class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $post->user->name[0] }}
-                                        </span>
-                                    </div>
-                                    <p>
-                                        <a class="text-decoration-none text-dark"
-                                            href="/posts?author={{ $post->user->name }}">{{ $post->user->name }}</a>.
-                                        <small class="text-secondary">{{ $post->created_at->diffForHumans() }}</small>
+                                <div class="d-flex gap-2 align-items-center mb-2">
+                                    <a class="d-flex text-decoration-none text-dark gap-2"
+                                        href="{{ route('profile', ['username' => $post->user->username]) }}"
+                                        style="font-size: 0.9rem">
+                                        @if ($post->user->profile_image)
+                                            <img src="{{ asset('profile_images/' . $post->user->profile_image) }}"
+                                                alt="Profile Picture" class="rounded-circle"
+                                                style="width: 25px; height: 25px; cursor: pointer"
+                                                data-bs-toggle="dropdown">
+                                        @else
+                                            <div id="profile-color"
+                                                class="text-white border-0 btn-secondary rounded-circle position-relative flex-shrink-0"
+                                                style="height: 25px; width: 25px; background-color: {{ $post->user->profile_color }}">
+                                                <span style="font-size: 0.9rem; pointer-events: none;"
+                                                    class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $post->user->name[0] }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                        <p class="underline-hover m-0" style="font-size: 1rem">
+                                            {{ $post->user->name }}
+                                        </p>
+                                    </a>
+                                    &#46;
+                                    <p class="m-0">
+                                        <small class="text-secondary m-0">{{ $post->created_at->diffForHumans() }}</small>
                                     </p>
                                 </div>
                                 <h5 class="card-title">

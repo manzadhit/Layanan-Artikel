@@ -2,36 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Models\Like;
+use App\Notifications\PostLiked;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
     public function toggleLike(Request $request)
     {
-        $postId = $request->post_id;
-        $userId = auth()->id();
+        try {
+            $postId = $request->post_id;
+            $userId = Auth::id();
 
-        $like = Like::where('post_id', $postId)->where('user_id', $userId)->first();
+            $post = Post::findOrFail($postId);
 
-        if ($like) {
-            $like->delete();
-            $status = 'unliked';
-        } else {
-            Like::create([
-                'post_id' => $postId,
-                'user_id' => $userId,
-            ]);
-            $status = 'liked';
+            $result = DB::transaction(function () use ($post, $userId) {
+                $like = $post->likes()->where('user_id', $userId)->first();
+
+                if ($like) {
+                    $like->delete();
+                    $status = 'unliked';
+                } else {
+                    $post->likes()->create(['user_id' => $userId]);
+                    if ($post->user_id !== $userId) {
+                        $post->user->notify(new PostLiked(Auth::user(), $post));
+                    }
+                    $status = 'liked';
+                }
+
+                $likeCount = $post->likes()->count();
+
+                return [
+                    'status' => $status,
+                    'likeCount' => $likeCount,
+                ];
+            });
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
         }
-
-        $likeCount = Like::where('post_id', $postId)->count();
-
-        return response()->json([
-            'status' => $status,
-            'likeCount' => $likeCount,
-        ]);
     }
 }

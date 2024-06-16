@@ -38,6 +38,18 @@
             height: auto;
             /* Menjaga proporsi aspek gambar */
         }
+
+        .underline-hover {
+            text-decoration: none;
+            /* Menghilangkan garis bawah */
+            transition: text-decoration 0.3s ease;
+            /* Efek transisi */
+        }
+
+        .underline-hover:hover {
+            text-decoration: underline;
+            /* Menambah garis bawah saat dihover */
+        }
     </style>
 @endsection
 
@@ -47,23 +59,40 @@
         <div class="col-8 mt-4 mx-auto d-flex flex-column gap-4">
             <h1 class="fw-bold">{{ $post->title }}</h1>
             <div class="d-flex gap-3">
-                <div id="profile-color" class="btn border-0 btn-secondary rounded-circle position-relative" type="button"
-                    data-bs-toggle="dropdown" aria-expanded="false"
-                    style="width: 45px; background-color: {{ $post->user->profile_color }}">
-                    <span style="font-size: 1.3rem"
-                        class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $post->user->name[0] }}
-                    </span>
-                </div>
-                {{-- follow-form --}}
-                <div>
+                <div class="d-flex gap-2 mb-2">
+                    <a class="d-flex text-decoration-none text-dark gap-3 align-items-center"
+                        href="{{ route('profile', ['username' => $post->user->username]) }}" style="font-size: 0.9rem">
+                        @if ($post->user->profile_image)
+                            <img src="{{ asset('profile_images/' . $post->user->profile_image) }}" alt="Profile Picture"
+                                class="rounded-circle" style="width: 35px; height: 35px; cursor: pointer"
+                                data-bs-toggle="dropdown">
+                        @else
+                            <div id="profile-color"
+                                class="text-white border-0 btn-secondary rounded-circle position-relative flex-shrink-0"
+                                style="height: 35px; width: 35px; background-color: {{ $post->user->profile_color }}">
+                                <span style="font-size: 0.9rem; pointer-events: none;"
+                                    class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $post->user->name[0] }}
+                                </span>
+                            </div>
+                        @endif
+                        <div class="d-flex flex-column gap-1">
+                            <p class="underline-hover m-0" style="font-size: 1rem">
+                                {{ $post->user->name }}
+                            </p>
+                            <p class="m-0">
+                                <small class="text-secondary m-0">{{ $post->created_at->diffForHumans() }}</small>
+                            </p>
+                        </div>
+                    </a>
+                    {{-- follow-form --}}
                     <form class="m-0" id="follow-form">
                         @csrf
                         <input type="hidden" name="followed_user_id" value="{{ $post->user ? $post->user->id : '' }}">
                         <p class="p-0 m-0">
-                            {{ $post->user->name }}
                             @if (auth()->check())
                                 @if (auth()->id() != $post->user->id)
-                                    .<button type="button" id="followBtn"
+                                    &#46;
+                                    <button type="button" id="followBtn"
                                         class="follow-btn text-success text-decoration-none border-0 bg-transparent"
                                         style="cursor: pointer;"
                                         data-following="{{ auth()->user()->isFollowing($post->user)? 'true': 'false' }}"
@@ -80,7 +109,6 @@
                             @endif
                         </p>
                     </form>
-                    <small class="text-secondary">{{ $post->created_at->diffForHumans() }}</small>
                 </div>
             </div>
             <div class="border border-start-0 border-end-0 p-3 d-flex justify-content-between">
@@ -189,13 +217,19 @@
                             <form id="postForm" action="{{ route('comment.store', ['postId' => $post->id]) }}"
                                 method="POST">
                                 @csrf
-                                <div class="d-flex flex-start w-100">
-                                    <div class="btn me-3 btn-secondary border-0 rounded-circle text-center position-relative"
-                                        type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                        style="width: 40px; height: 40px; background-color: {{ $user->profile_color }}">
-                                        <span
-                                            class="position-absolute top-50 start-50 translate-middle fs-5 text">{{ $user->name[0] }}</span>
-                                    </div>
+                                <div class="d-flex flex-start gap-3 w-100">
+                                    @if (auth()->user()->profile_image)
+                                        <img src="{{ asset('profile_images/' . auth()->user()->profile_image) }}"
+                                            alt="Profile Picture" class="rounded-circle"
+                                            style="width: 35px; height: 35px; cursor: pointer" data-bs-toggle="dropdown">
+                                    @else
+                                        <div class="btn btn-secondary border-0 rounded-circle text-center position-relative"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                            style="width: 40px; height: 40px; background-color: {{ $user->profile_color }}">
+                                            <span
+                                                class="position-absolute top-50 start-50 translate-middle fs-5 text">{{ $user->name[0] }}</span>
+                                        </div>
+                                    @endif
                                     <div data-mdb-input-init class="form-outline w-100">
                                         <textarea class="form-control" id="comment" name="comment" rows="4" style="background: #fff;"
                                             placeholder="message..">{{ old('comment') }}</textarea>
@@ -217,13 +251,20 @@
                         @foreach ($comments as $comment)
                             <div class="card-body border mb-1 rounded">
                                 <div class="d-flex  justify-content-between align-items-center">
-                                    <div class="d-flex flex-start align-items-center">
-                                        <div class="btn me-3 btn-secondary border-0 rounded-circle text-center position-relative"
-                                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                            style="width: 40px; height: 40px; background-color: {{ $comment->user->profile_color }}">
-                                            <span
-                                                class="position-absolute top-50 start-50 translate-middle fs-5 text">{{ $comment->user->name[0] }}</span>
-                                        </div>
+                                    <div class="d-flex flex-start align-items-center gap-3">
+                                        @if ($comment->user->profile_image)
+                                            <img src="{{ asset('profile_images/' . $comment->user->profile_image) }}"
+                                                alt="Profile Picture" class="rounded-circle"
+                                                style="width: 35px; height: 35px; cursor: pointer"
+                                                data-bs-toggle="dropdown">
+                                        @else
+                                            <div class="btn btn-secondary border-0 rounded-circle text-center position-relative"
+                                                type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                                style="width: 40px; height: 40px; background-color: {{ $comment->user->profile_color }}">
+                                                <span
+                                                    class="position-absolute top-50 start-50 translate-middle fs-5 text">{{ $comment->user->name[0] }}</span>
+                                            </div>
+                                        @endif
                                         <div>
                                             <p class="mb-1">{{ $comment->user->name }}</p>
                                             <small

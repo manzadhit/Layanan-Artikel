@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Follow;
 use App\Models\User;
+use App\Notifications\UserFollowed;
 
 class FollowController extends Controller
 {
@@ -34,6 +35,14 @@ class FollowController extends Controller
                 'user_id' => $userId,
                 'followed_user_id' => $followedUserId
             ]);
+
+            // Fetch the followed user and the current user
+            $followedUser = User::findOrFail($followedUserId);
+            $follower = User::findOrFail($userId);
+
+            // Send notification
+            $followedUser->notify(new UserFollowed($follower));
+
             $isFollowing = true;
             $message = 'Following';
         }

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Comment;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Notifications\PostCommented;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -28,6 +31,9 @@ class CommentController extends Controller
 
         // Simpan comment ke dalam database
         $post->comments()->save($comment);
+
+        // Kirim notifikasi ke penulis posting
+        $post->user->notify(new PostCommented(Auth::user(), $post));
 
         // Redirect pengguna kembali ke halaman sebelumnya dengan pesan sukses
         return redirect()->back()->with('success', 'Comment added!')->with('comment_added', true);
@@ -71,4 +77,3 @@ class CommentController extends Controller
         return redirect()->back()->with('success', 'Comment deleted!');
     }
 }
-
