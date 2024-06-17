@@ -91,12 +91,17 @@
                                         {!! Str::limit($getFirstTagRegex($post->content), 300) !!}
                                     </a>
                                 </p>
+                                {{-- categories --}}
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="d-flex">
                                         @foreach ($post->categories as $category)
-                                            <div class="px-3 rounded-pill me-2" style="background-color: #f6f6f6">
-                                                {{ $category->name }}
-                                            </div>
+                                            <a class="d-flex text-decoration-none text-dark gap-3 align-items-center"
+                                                href="{{ route('category.posts', ['slug' => $category->slug]) }}"
+                                                >
+                                                <div class="px-3 rounded-pill me-2" style="background-color: #f6f6f6">
+                                                    {{ $category->name }}
+                                                </div>
+                                            </a>
                                         @endforeach
                                     </div>
                                     <div class=" d-flex gap-2 me-2">

@@ -203,14 +203,17 @@
             {{-- Categories --}}
             <div class="d-flex">
                 @foreach ($post->categories as $category)
-                    <div class="px-3 rounded-pill me-2" style="background-color: #f6f6f6">
-                        {{ $category->name }}
-                    </div>
+                    <a class="d-flex text-decoration-none text-dark gap-3 align-items-center"
+                        href="{{ route('category.posts', ['slug' => $category->slug]) }}">
+                        <div class="px-3 rounded-pill me-2" style="background-color: #f6f6f6">
+                            {{ $category->name }}
+                        </div>
+                    </a>
                 @endforeach
             </div>
             {{-- Comments --}}
             <div class="row d-flex justify-content-center mt-4">
-                <h2 class="mb-3">Comment({{ $comments->count() }})</h2>
+                <h3 class="mb-3">Comments({{ $comments->count() }})</h3>
                 <div class="col-md-12">
                     @if (auth()->check())
                         <div class="card-footer py-3 border-0">
