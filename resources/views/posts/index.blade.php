@@ -41,13 +41,18 @@
                 <a href="/" class="nav-link">For you</a>
             </div>
 
-            @foreach ($user->followedCategories as $category)
-                <div class=" pb-3 {{ request('category') == $category->slug ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
-                    style="margin-bottom: -1px">
-                    <a class="nav-link" aria-current="page"
-                        href="/posts?category={{ $category->slug }}">{{ $category->name }}</a>
-                </div>
-            @endforeach
+            @auth
+                @foreach (auth()->user()->followedCategories as $category)
+                    <div class=" pb-3 {{ request('category') == $category->slug ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
+                        style="margin-bottom: -1px">
+                        <a class="nav-link" aria-current="page"
+                            href="/posts?category={{ $category->slug }}">{{ $category->name }}</a>
+                    </div>
+                @endforeach
+            @else
+                <!-- Tampilkan sesuatu untuk pengguna yang belum login -->
+                <a class="text-decoration-none text-dark" href="{{ route("login") }}"><p class="underline-hover">Login to see other categories</p></a>
+            @endauth
         </div>
         @if ($posts->count())
             <div class="col-10 mt-4 mx-auto">
@@ -96,8 +101,7 @@
                                     <div class="d-flex">
                                         @foreach ($post->categories as $category)
                                             <a class="d-flex text-decoration-none text-dark gap-3 align-items-center"
-                                                href="{{ route('category.posts', ['slug' => $category->slug]) }}"
-                                                >
+                                                href="{{ route('category.posts', ['slug' => $category->slug]) }}">
                                                 <div class="px-3 rounded-pill me-2" style="background-color: #f6f6f6">
                                                     {{ $category->name }}
                                                 </div>
