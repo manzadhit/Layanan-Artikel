@@ -373,6 +373,17 @@
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var links = document.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                var href = links[i].getAttribute('href');
+                if (href && !href.match(/^(https?:\/\/|\/|#)/i)) {
+                    links[i].href = 'https://' + href;
+                }
+            }
+        });
+    </script>
+    <script>
         $(document).ready(function() {
             $('#save-button').on('click', function() {
                 var postId = $('input[name="post_id"]').val();

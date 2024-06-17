@@ -14,7 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\NotificationController;
 
-URL::forceScheme('https');
+// URL::forceScheme('https');
 
 // Rute untuk registrasi
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');

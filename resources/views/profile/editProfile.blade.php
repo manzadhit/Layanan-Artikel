@@ -75,6 +75,7 @@
 
                         <!-- Save changes button-->
                         <button class="btn btn-primary" type="submit">Save changes</button>
+                        <button class="btn btn-primary" type="button" onclick="window.history.back();">Cancel</button>
                     </form>
                 </div>
             </div>

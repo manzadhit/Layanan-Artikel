@@ -109,8 +109,7 @@ if (isset($post)) {
                         'heading', '|', 'bold', 'italic', 'strikethrough', 'underline', 'alignment',
                         '|',
                         'indent', 'outdent', '|', 'link',
-                        'uploadImage', 'codeBlock',
-                        'insertTable',
+                        'uploadImage'
                     ],
                     shouldNotGroupWhenFull: true
                 },
@@ -203,17 +202,17 @@ if (isset($post)) {
                     showPreviews: true
                 },
                 link: {
-                    decorators: {
-                        addTargetToExternalLinks: true,
-                        defaultProtocol: 'https://',
-                        toggleDownloadable: {
-                            mode: 'manual',
-                            label: 'Downloadable',
-                            attributes: {
-                                download: 'file'
-                            }
+                    // Automatically add target="_blank" and rel="noopener noreferrer" to all external links.
+                    addTargetToExternalLinks: true,
+
+                    // Let the users control the "download" attribute of each link.
+                    decorators: [{
+                        mode: 'manual',
+                        label: 'Downloadable',
+                        attributes: {
+                            download: 'download'
                         }
-                    }
+                    }]
                 },
                 removePlugins: [
                     'AIAssistant',
@@ -331,7 +330,7 @@ if (isset($post)) {
                     if (isFormChanged) {
                         const confirmLeave = confirm(
                             'Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?'
-                            );
+                        );
                         if (confirmLeave) {
                             clearLocalStorage();
                         } else {
@@ -350,7 +349,7 @@ if (isset($post)) {
                     if (isFormChanged) {
                         const confirmLeave = confirm(
                             'Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?'
-                            );
+                        );
                         if (confirmLeave) {
                             clearLocalStorage();
                         } else {
