@@ -1,14 +1,5 @@
 @extends('../template')
-
-@section('title', 'All Posts - TrendZine')
-<!-- navbar.blade.php -->
-@if (auth()->check())
-    <!-- Navbar untuk pengguna yang sudah login -->
-    @include('partials.logged_in_navbar', ['user' => $user])
-@else
-    <!-- Navbar untuk pengguna yang belum login -->
-    @include('partials.logged_out_navbar')
-@endif
+@include('partials.logged_in_navbar', ['user' => Auth()->user()])
 
 @section('styles')
     <style>
@@ -27,31 +18,28 @@
 @endsection
 
 @section('content')
-    <div class="container">
-        <div class="d-flex mb-3 gap-4 pt-4 border-bottom mx-auto align-items-center">
-            <a class="pb-3 text-decoration-none text-dark" href="{{ route('categories') }}" style="cursor: pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg"
-                    viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
-                </svg>
-            </a>
-            <div class=" pb-3  {{ Request::is('/') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
-                style="margin-bottom: -1px;">
-                <a href="/" class="nav-link">For you</a>
-            </div>
-
-            @foreach ($user->followedCategories as $category)
-                <div class=" pb-3 {{ request('category') == $category->slug ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
-                    style="margin-bottom: -1px">
-                    <a class="nav-link" aria-current="page"
-                        href="/posts?category={{ $category->slug }}">{{ $category->name }}</a>
-                </div>
-            @endforeach
+    <h1 class="text-center mt-5"><span class="text-secondary">Result for</span> {{ request('q') }}</h1>
+    <div class="d-flex gap-5 mb-5 mt-3 pt-4 border-bottom col-4 mx-auto justify-content-center">
+        <div class="pb-3 {{ $type == 'posts' ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
+            style="margin-bottom: -1px;">
+            <a href="{{ route('search.type', ['type' => 'posts', 'q' => request('q')]) }}" class="nav-link">Posts</a>
         </div>
-        @if ($posts->count())
+        <div class=" pb-3 {{ $type == 'authors' ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
+            style="margin-bottom: -1px;">
+            <a href="{{ route('search.type', ['type' => 'authors', 'q' => request('q')]) }}" class="nav-link">Authors</a>
+        </div>
+        <div class=" pb-3 {{ $type == 'categories' ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
+            style="margin-bottom: -1px;">
+            <a href="{{ route('search.type', ['type' => 'categories', 'q' => request('q')]) }}"
+                class="nav-link">Categories</a>
+        </div>
+    </div>
+    @if (isset($results['posts']))
+        @if ($results['posts']->isEmpty())
+            <p class="text-center">No posts found</p>
+        @else
             <div class="col-10 mt-4 mx-auto">
-                @foreach ($posts as $post)
+                @foreach ($results['posts'] as $post)
                     <div class="card w-100 mb-3 border-0">
                         <div class="card-body d-flex gap-2">
                             <div class="col-9 me-4">
@@ -201,87 +189,104 @@
                     </div>
                 @endforeach
             </div>
-        @else
-            <p class="text-center">No post found</p>
+            {{ $results['posts']->appends(request()->query())->links('pagination::bootstrap-5') }}
         @endif
-    </div>
-@endsection
-
-@push('scripts')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.save-button').on('click', function() {
-                var postId = $(this).closest('.saveForm').data('post-id');
-                var $button = $(this);
-                var isSaved = $button.data('saved') === 'true';
-
-                $.ajax({
-                    url: '{{ route('toggle.save') }}',
-                    type: 'POST',
-                    data: {
-                        post_id: postId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        if (response.status === 'saved') {
-                            $button.data('saved', 'true');
-                            $button.find('svg').attr('class', 'ajw')
-                                .find('path').attr('d',
-                                    'M7.5 3.75a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-14a2 2 0 0 0-2-2h-9z'
-                                );
-                        } else {
-                            $button.data('saved', 'false');
-                            $button.find('svg').attr('class', 'lm')
-                                .find('path').attr('d',
-                                    'M17.5 1.25a.5.5 0 0 1 1 0v2.5H21a.5.5 0 0 1 0 1h-2.5v2.5a.5.5 0 0 1-1 0v-2.5H15a.5.5 0 0 1 0-1h2.5v-2.5zm-11 4.5a1 1 0 0 1 1-1H11a.5.5 0 0 0 0-1H7.5a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-8.5a.5.5 0 0 0-1 0v7.48l-5.2-4a.5.5 0 0 0-.6 0l-5.2 4V5.75z'
-                                );
-                        }
-                    }
-                });
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            // Handler untuk tombol follow
-            $(document).on('click', '.follow-btn', function() {
-                var btn = $(this);
-                var isFollowing = btn.data('following') === 'true';
-                var userId = btn.data('user-id');
-
-                @if (auth()->check())
-                    var authUserId = {{ auth()->id() }};
-                    $.ajax({
-                        url: "{{ route('toggle.follow', ['userId' => ':userId']) }}".replace(
-                            ':userId', authUserId),
-                        method: 'POST',
-                        data: {
-                            _token: $('input[name="_token"]').val(),
-                            followed_user_id: userId
-                        },
-                        success: function(response) {
-                            if (response.isFollowing) {
-                                btn.text('Unfollow author').data('following', 'true');
-                            } else {
-                                btn.text('Follow author').data('following', 'false');
-                            }
-                        },
-                        error: function(xhr) {
-                            console.error(xhr.responseText);
-                            alert('An error occurred. Please try again.');
-                        }
-                    });
-                @else
-                    // Jika pengguna belum login, arahkan ke halaman login
-                    window.location.href = "{{ route('login') }}";
+    @elseif(isset($results['authors']))
+        @if ($results['authors']->isEmpty())
+            <p class="text-center">No authors found</p>
+        @else
+            @foreach ($results['authors'] as $author)
+                @if ($author->id !== auth()->id())
+                    <div class="mb-3">
+                        <a class="d-flex text-decoration-none text-dark gap-3"
+                            href="{{ route('profile', ['username' => $author->username]) }}" style="font-size: 0.9rem">
+                            @if ($author->profile_image)
+                                <img src="{{ asset('profile_images/' . $author->profile_image) }}" alt="Profile Picture"
+                                    class="rounded-circle" style="width: 45px; height: 45px; cursor: pointer"
+                                    data-bs-toggle="dropdown">
+                            @else
+                                <div id="profile-color"
+                                    class="text-white border-0 btn-secondary rounded-circle position-relative flex-shrink-0"
+                                    style="height: 45px; width: 45px; background-color: {{ $author->profile_color }}">
+                                    <span style="font-size: 2rem; pointer-events: none;"
+                                        class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $author->name[0] }}
+                                    </span>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="underline-hover m-0 fs-5 my-auto">
+                                    {{ $author->name }}
+                                </p>
+                                <p class="m-0 text-secondary">{{ $author->posts()->count() }} Posts</p>
+                            </div>
+                            <form class="m-0 my-auto ms-auto" id="follow-form">
+                                @csrf
+                                <input type="hidden" name="followed_user_id" value="{{ $author ? $author->id : '' }}">
+                                <div class="p-0 m-0">
+                                    @if (auth()->id() != $author->id)
+                                        <button type="button" id="followBtn"
+                                            class="follow-btn rounded-pill {{ auth()->user()->isFollowing($author) ? 'border-success text-success' : 'btn-success' }} btn"
+                                            style="cursor: pointer;"
+                                            data-following="{{ auth()->user()->isFollowing($author) ? 'true' : 'false' }}"
+                                            data-user-id="{{ $author->id }}">
+                                            {{ auth()->user()->isFollowing($author) ? 'Following' : 'Follow' }}
+                                        </button>
+                                    @endif
+                                </div>
+                            </form>
+                        </a>
+                    </div>
                 @endif
-            });
-
-            // Handler untuk tombol "Login to Follow"
-            $(document).on('click', '#loginToFollowBtn', function() {
-                window.location.href = "{{ route('login') }}";
-            });
-        });
-    </script>
-@endpush
+            @endforeach
+            {{ $results['authors']->appends(request()->query())->links() }}
+        @endif
+    @elseif(isset($results['categories']))
+        @if ($results['categories']->isEmpty())
+            <p class="text-center">No categories found</p>
+        @else
+            <div class="col-8 mx-auto">
+                @foreach ($results['categories'] as $category)
+                    <div class="mb-3">
+                        <a class="d-flex text-decoration-none text-dark gap-3 align-items-center"
+                            href="{{ route('category.posts', ['slug' => $category->slug]) }}" style="font-size: 0.9rem">
+                            <div id="profile-color"
+                                class="text-white border-0 btn-secondary rounded-circle position-relative flex-shrink-0"
+                                style="height: 45px; width: 45px; background-color: #F2F2F2">
+                                <span style="font-size: 2rem; pointer-events: none;"
+                                    class="m-0 text-center position-absolute top-50 start-50 translate-middle">
+                                    <svg style="color: black" width="16" height="16" viewBox="0 0 16 16"
+                                        fill="" class="rx">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M3 14V2h10v12H3zM2.75 1a.75.75 0 0 0-.75.75v12.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V1.75a.75.75 0 0 0-.75-.75H2.75zM5 10.5a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zM4.5 9c0-.28.22-.5.5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm1.25-2.5h4.5c.14 0 .25-.11.25-.25v-1.5a.25.25 0 0 0-.25-.25h-4.5a.25.25 0 0 0-.25.25v1.5c0 .14.11.25.25.25z"
+                                            fill="currentColor"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                            <div>
+                                <p class="underline-hover m-0 fs-5 my-auto">
+                                    {{ $category->name }}
+                                </p>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <p class="m-0 text-secondary">{{ $category->followers->count() }} Followers</p>
+                                    <span class="mx-1 align-middle">•</span>
+                                    <p class="m-0 text-secondary">{{ $category->posts()->count() }} Posts</p>
+                                </div>
+                            </div>
+                            <form class="m-0 ms-auto" action="{{ route('categories.follow', $category) }}"
+                                method="POST">
+                                @csrf
+                                <button type="submit"
+                                    class="btn {{ auth()->user()->followedCategories->contains($category) ? 'border-success  text-success' : 'btn-success' }}">
+                                    {{ auth()->user()->followedCategories->contains($category) ? 'Unfollow' : 'Follow' }}
+                                </button>
+                            </form>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+            {{ $results['categories']->appends(request()->query())->links() }}
+        @endif
+    @else
+        <p>No results found</p>
+    @endif
+@endsection

@@ -21,12 +21,10 @@
                         d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
                 </svg>
                 <!-- Search Form -->
-                <form class="d-flex m-auto" role="search" action="{{ route('posts.index') }}" method="GET">
-                    @if (request('category'))
-                        <input type="hidden" name="category" value="{{ request('category') }}">
-                    @endif
+                <form class="d-flex m-auto" role="search"
+                    action="{{ route('search.type', ['type' => request('type', 'posts')]) }}" method="GET">
                     <input id="search" class="me-2 border-0 bg-transparent" type="search" placeholder="Search"
-                        aria-label="Search" name="search" value="{{ request('search') }}"
+                        aria-label="Search" name="q" value="{{ request('q') }}"
                         onkeypress="if(event.keyCode == 13) { this.form.submit(); return false; }">
                 </form>
             </div>

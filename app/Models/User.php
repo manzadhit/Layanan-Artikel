@@ -60,6 +60,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Post::class, 'saved_posts', 'user_id', 'post_id');
     }
 
+    public function followedCategories()
+    {
+        return $this->belongsToMany(Category::class)->withTimestamps();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

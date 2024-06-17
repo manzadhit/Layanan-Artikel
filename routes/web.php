@@ -7,12 +7,14 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CategoryController;
 
 // URL::forceScheme('https');
 
@@ -68,6 +70,11 @@ Route::middleware(['auth'])->group(function () {
   // routes/web.php
   Route::get('{username}/notifications', [NotificationController::class, "index"])->name('notifications');
 
+  Route::get("/category/{slug}", [CategoryController::class, 'show'])->name("category.posts");
+  Route::get("/category", [CategoryController::class, 'index'])->name("categories");
+
+  Route::post('/categories/{category}/follow', [CategoryController::class, 'follow'])->name('categories.follow');
+
 });
 
 // Rute untuk menampilkan postingan berdasarkan slug
@@ -78,3 +85,7 @@ Route::get('/', [PostController::class, 'index'])->name('home');
 
 // Rute untuk menampilkan semua postingan dan kategori
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+Route::get('/search/{type}', [SearchController::class, 'search'])->name('search.type');
+

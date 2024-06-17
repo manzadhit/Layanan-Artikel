@@ -49,7 +49,7 @@ if (isset($post)) {
 ?>
 
 @section('content')
-    <h2 class="text-center fw-bold">{{ isset($post) ? 'Edit Post' : 'Create Post' }}</h2>
+    <h2 class="text-center fw-bold mt-5">{{ isset($post) ? 'Edit Post' : 'Create Post' }}</h2>
     <div id="container">
         <form action="{{ $route }}" method="POST" id="post-form">
             @csrf

@@ -1,55 +1,25 @@
 @extends('../template')
-
-@section('title', 'All Posts - TrendZine')
-<!-- navbar.blade.php -->
-@if (auth()->check())
-    <!-- Navbar untuk pengguna yang sudah login -->
-    @include('partials.logged_in_navbar', ['user' => $user])
-@else
-    <!-- Navbar untuk pengguna yang belum login -->
-    @include('partials.logged_out_navbar')
-@endif
-
-@section('styles')
-    <style>
-        .underline-hover {
-            text-decoration: none;
-            /* Menghilangkan garis bawah */
-            transition: text-decoration 0.3s ease;
-            /* Efek transisi */
-        }
-
-        .underline-hover:hover {
-            text-decoration: underline;
-            /* Menambah garis bawah saat dihover */
-        }
-    </style>
-@endsection
+@include('partials.logged_in_navbar', ['user' => Auth::user()])
 
 @section('content')
-    <div class="container">
-        <div class="d-flex mb-3 gap-4 pt-4 border-bottom mx-auto align-items-center">
-            <a class="pb-3 text-decoration-none text-dark" href="{{ route('categories') }}" style="cursor: pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg"
-                    viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
-                </svg>
-            </a>
-            <div class=" pb-3  {{ Request::is('/') && !request('category') ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
-                style="margin-bottom: -1px;">
-                <a href="/" class="nav-link">For you</a>
-            </div>
 
-            @foreach ($user->followedCategories as $category)
-                <div class=" pb-3 {{ request('category') == $category->slug ? 'border-bottom border-black' : 'text-dark-emphasis' }}"
-                    style="margin-bottom: -1px">
-                    <a class="nav-link" aria-current="page"
-                        href="/posts?category={{ $category->slug }}">{{ $category->name }}</a>
-                </div>
-            @endforeach
+    <div class="container mt-4">
+        <div class="d-flex flex-column align-items-center gap-3">
+            <h1 class="text-center m-0">{{ $category->name }}</h1>
+            <div class="d-flex gap-2 align-items-center">
+                <p class="m-0 text-secondary">{{ $category->followers->count() }} Followers</p>
+                <span class="mx-1 align-middle">•</span>
+                <p class="m-0 text-secondary">{{ $category->posts()->count() }} Posts</p>
+            </div>
+            <form action="{{ route('categories.follow', $category) }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="btn {{ auth()->user()->followedCategories->contains($category) ? 'border-dark  text-dark' : 'btn-dark' }}">
+                    {{ auth()->user()->followedCategories->contains($category) ? 'Unfollow' : 'Follow' }}
+                </button>
+            </form>
         </div>
-        @if ($posts->count())
+        @if ($posts->count() > 0)
             <div class="col-10 mt-4 mx-auto">
                 @foreach ($posts as $post)
                     <div class="card w-100 mb-3 border-0">
@@ -202,86 +172,7 @@
                 @endforeach
             </div>
         @else
-            <p class="text-center">No post found</p>
+            <p class="text-center">No posts found in this category.</p>
         @endif
     </div>
 @endsection
-
-@push('scripts')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.save-button').on('click', function() {
-                var postId = $(this).closest('.saveForm').data('post-id');
-                var $button = $(this);
-                var isSaved = $button.data('saved') === 'true';
-
-                $.ajax({
-                    url: '{{ route('toggle.save') }}',
-                    type: 'POST',
-                    data: {
-                        post_id: postId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        if (response.status === 'saved') {
-                            $button.data('saved', 'true');
-                            $button.find('svg').attr('class', 'ajw')
-                                .find('path').attr('d',
-                                    'M7.5 3.75a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-14a2 2 0 0 0-2-2h-9z'
-                                );
-                        } else {
-                            $button.data('saved', 'false');
-                            $button.find('svg').attr('class', 'lm')
-                                .find('path').attr('d',
-                                    'M17.5 1.25a.5.5 0 0 1 1 0v2.5H21a.5.5 0 0 1 0 1h-2.5v2.5a.5.5 0 0 1-1 0v-2.5H15a.5.5 0 0 1 0-1h2.5v-2.5zm-11 4.5a1 1 0 0 1 1-1H11a.5.5 0 0 0 0-1H7.5a2 2 0 0 0-2 2v14a.5.5 0 0 0 .8.4l5.7-4.4 5.7 4.4a.5.5 0 0 0 .8-.4v-8.5a.5.5 0 0 0-1 0v7.48l-5.2-4a.5.5 0 0 0-.6 0l-5.2 4V5.75z'
-                                );
-                        }
-                    }
-                });
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            // Handler untuk tombol follow
-            $(document).on('click', '.follow-btn', function() {
-                var btn = $(this);
-                var isFollowing = btn.data('following') === 'true';
-                var userId = btn.data('user-id');
-
-                @if (auth()->check())
-                    var authUserId = {{ auth()->id() }};
-                    $.ajax({
-                        url: "{{ route('toggle.follow', ['userId' => ':userId']) }}".replace(
-                            ':userId', authUserId),
-                        method: 'POST',
-                        data: {
-                            _token: $('input[name="_token"]').val(),
-                            followed_user_id: userId
-                        },
-                        success: function(response) {
-                            if (response.isFollowing) {
-                                btn.text('Unfollow author').data('following', 'true');
-                            } else {
-                                btn.text('Follow author').data('following', 'false');
-                            }
-                        },
-                        error: function(xhr) {
-                            console.error(xhr.responseText);
-                            alert('An error occurred. Please try again.');
-                        }
-                    });
-                @else
-                    // Jika pengguna belum login, arahkan ke halaman login
-                    window.location.href = "{{ route('login') }}";
-                @endif
-            });
-
-            // Handler untuk tombol "Login to Follow"
-            $(document).on('click', '#loginToFollowBtn', function() {
-                window.location.href = "{{ route('login') }}";
-            });
-        });
-    </script>
-@endpush
