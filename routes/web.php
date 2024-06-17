@@ -5,16 +5,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
+use App\Http\Middleware\ConfirmPassword;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\CategoryController;
 
 // URL::forceScheme('https');
 
@@ -75,6 +77,10 @@ Route::middleware(['auth'])->group(function () {
 
   Route::post('/categories/{category}/follow', [CategoryController::class, 'follow'])->name('categories.follow');
 
+  Route::get('/account/delete', [AccountController::class, 'showDeleteForm'])->name('account.delete.form');
+  Route::delete('/account/delete', [AccountController::class, 'deleteAccount'])
+  ->name('account.delete');
+  // ->middleware('confirm.password');
 });
 
 // Rute untuk menampilkan postingan berdasarkan slug

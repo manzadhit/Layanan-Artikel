@@ -69,7 +69,8 @@
                                                 liked your post: {{ $notification->data['post_title'] }}
                                             </a>
                                         @elseif ($notification->type === 'App\Notifications\PostCommented')
-                                            <span style="font-size: 1.2rem">{{ $notification->data['commenter_name'] }}</span>
+                                            <span
+                                                style="font-size: 1.2rem">{{ $notification->data['commenter_name'] }}</span>
                                             <a class="text-secondary underline-hover" style="font-size: 1rem"
                                                 href="{{ route('posts.show', ['slug' => $notification->data['post_slug']]) }}"
                                                 class="text-decoration-none text-dark">
@@ -400,29 +401,23 @@
                         </p>
                     </div>
                 @endif
-                <form class="m-0" id="follow-form">
-                    @csrf
-                    <input type="hidden" name="followed_user_id" value="{{ $user ? $user->id : '' }}">
-                    <div class="p-0 m-0">
-                        @if (auth()->check())
-                            @if (auth()->id() != $user->id)
-                                <button type="button" id="followBtn"
-                                    class="follow-btn rounded-pill {{ auth()->user()->isFollowing($user) ? 'border-success text-success' : 'btn-success' }} btn"
-                                    style="cursor: pointer;"
-                                    data-following="{{ auth()->user()->isFollowing($user) ? 'true' : 'false' }}"
-                                    data-user-id="{{ $user->id }}">
-                                    {{ auth()->user()->isFollowing($user) ? 'Following' : 'Follow' }}
-                                </button>
-                            @endif
-                        @else
-                            .<button type="button" id="loginToFollowBtn"
-                                class="text-success text-decoration-none border-0 bg-transparent"
-                                style="cursor: pointer;">
-                                Login to Follow
+                @if (auth()->id() == $user->id)
+                    <a href="{{ route('account.delete.form') }}" class="btn btn-danger">Delete Account</a>
+                @else
+                    <form class="m-0" id="follow-form">
+                        @csrf
+                        <input type="hidden" name="followed_user_id" value="{{ $user ? $user->id : '' }}">
+                        <div class="p-0 m-0">
+                            <button type="button" id="followBtn"
+                                class="follow-btn rounded-pill {{ auth()->user()->isFollowing($user) ? 'border-success text-success' : 'btn-success' }} btn"
+                                style="cursor: pointer;"
+                                data-following="{{ auth()->user()->isFollowing($user) ? 'true' : 'false' }}"
+                                data-user-id="{{ $user->id }}">
+                                {{ auth()->user()->isFollowing($user) ? 'Following' : 'Follow' }}
                             </button>
-                        @endif
-                    </div>
-                </form>
+                        </div>
+                    </form>
+                @endif
             </div>
             <p class="fw-semibold mt-2 mb-1">
                 {{ $user->name }}
