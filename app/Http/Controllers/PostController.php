@@ -266,7 +266,7 @@ class PostController extends Controller
         // Hapus post
         $post->delete();
 
-        return redirect()->route('posts.index')->with('success', 'Post dan gambar terkait berhasil dihapus.');
+        return redirect()->back()->with('success', 'Post dan gambar terkait berhasil dihapus.');
     }
 
     private function removeUnusedImages($oldContent, $newContent)

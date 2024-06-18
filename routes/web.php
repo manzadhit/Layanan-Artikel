@@ -17,6 +17,7 @@ use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DashboardController;
 
 // URL::forceScheme('https');
 
@@ -28,6 +29,10 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth', 'admin'])->group(function () {
+  Route::get('/dashboard/{type}', [DashboardController::class, 'index'])->name('dashboard');
+});
 
 // Rute yang membutuhkan autentikasi
 Route::middleware(['auth'])->group(function () {
@@ -79,7 +84,7 @@ Route::middleware(['auth'])->group(function () {
 
   Route::get('/account/delete', [AccountController::class, 'showDeleteForm'])->name('account.delete.form');
   Route::delete('/account/delete', [AccountController::class, 'deleteAccount'])
-  ->name('account.delete');
+    ->name('account.delete');
   // ->middleware('confirm.password');
 });
 
@@ -92,6 +97,4 @@ Route::get('/', [PostController::class, 'index'])->name('home');
 // Rute untuk menampilkan semua postingan dan kategori
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
-Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/search/{type}', [SearchController::class, 'search'])->name('search.type');
-

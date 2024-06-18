@@ -9,13 +9,6 @@ use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query  = $request->input('q');
-        $type = $request->input('type', 'posts');
-
-        return redirect()->route('search.type', ['type' => $type, 'q' => $query]);
-    }
 
     public function search(Request $request, $type)
     {

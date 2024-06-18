@@ -21,8 +21,14 @@ class LoginController extends Controller
 
         // Coba untuk login
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
-            // Redirect ke halaman /posts setelah berhasil login
-            return redirect('/');
+            // Cek peran pengguna setelah berhasil login
+            if (Auth::user()->role === 'admin') {
+                // Redirect ke dashboard admin jika pengguna adalah admin
+                return redirect()->route('dashboard');
+            } else {
+                // Redirect ke halaman utama (home) jika pengguna adalah user biasa
+                return redirect()->route('home');
+            }
         }
 
         // Jika gagal login, kembali ke halaman login dengan error
@@ -30,6 +36,7 @@ class LoginController extends Controller
             'email' => 'The provided credentials do not match our records.',
         ])->withInput($request->only('email'));
     }
+
 
     protected function validator(array $data)
     {
