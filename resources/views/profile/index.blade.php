@@ -26,7 +26,7 @@
         @if ($menu == 'notifications')
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <p class="fw-light"><a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
-                        class="underline-hover text-dark" style="cursor: pointer">{{ $user->username }}</a> > notifications
+                        class="underline-hover text-dark" style="cursor: pointer">{{ $user->name }}</a> > notifications
                 </p>
                 @if ($notifications->isNotEmpty())
                     <h1 class="fw-semibold mb-5 mt-3">{{ $notifications->count() }} Notifications</h1>
@@ -110,7 +110,7 @@
         @elseif ($menu == 'followers')
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <p class="fw-light"><a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
-                        class="underline-hover text-dark" style="cursor: pointer">{{ $user->username }}</a> > followers</p>
+                        class="underline-hover text-dark" style="cursor: pointer">{{ $user->name }}</a> > followers</p>
                 <h1 class="fw-semibold mb-4 mt-2">{{ $user->followers->count() }} Followers</h1>
                 @foreach ($user->followers as $follower)
                     <div class="mb-3">
@@ -161,7 +161,7 @@
         @elseif ($menu == 'following')
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <p class="fw-light"><a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
-                        class="underline-hover text-dark" style="cursor: pointer">{{ $user->username }}</a> > following</p>
+                        class="underline-hover text-dark" style="cursor: pointer">{{ $user->name }}</a> > following</p>
                 <h1 class="fw-semibold mb-4 mt-2">{{ $user->following->count() }} Following</h1>
                 @foreach ($user->following as $follow)
                     <div class="mb-3">
