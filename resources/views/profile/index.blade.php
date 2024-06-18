@@ -29,8 +29,14 @@
                         class="underline-hover text-dark" style="cursor: pointer">{{ $user->username }}</a> > notifications
                 </p>
                 @if ($notifications->isNotEmpty())
-                    <h1 class="fw-semibold mb-5 mt-3">Notifications</h1>
+                    <h1 class="fw-semibold mb-5 mt-3">{{ $notifications->count() }} Notifications</h1>
                     @foreach ($notifications as $index => $notification)
+                        @php
+                            $postTitle = $notification->data['post_title'];
+                            $words = explode(' ', $postTitle);
+                            $limitedWords = array_slice($words, 0, 5);
+                            $shortTitle = implode(' ', $limitedWords);
+                        @endphp
                         <div class="d-flex gap-3 mb-4">
                             <!-- Link gambar profil -->
                             <a href="{{ route('profile', ['username' => $userResponded[$index]->username]) }}"
@@ -66,7 +72,7 @@
                                             <a class="text-secondary underline-hover" style="font-size: 1rem"
                                                 href="{{ route('posts.show', ['slug' => $notification->data['post_slug']]) }}"
                                                 class="text-decoration-none text-dark">
-                                                liked your post: {{ $notification->data['post_title'] }}
+                                                liked your post: {!! Str::limit($notification->data['post_title'], 35) !!}
                                             </a>
                                         @elseif ($notification->type === 'App\Notifications\PostCommented')
                                             <span
@@ -74,14 +80,14 @@
                                             <a class="text-secondary underline-hover" style="font-size: 1rem"
                                                 href="{{ route('posts.show', ['slug' => $notification->data['post_slug']]) }}"
                                                 class="text-decoration-none text-dark">
-                                                commented on your post: {{ $notification->data['post_title'] }}
+                                                commented on your post: {!! Str::limit($notification->data['post_title'], 28) !!}
                                             </a>
                                         @elseif ($notification->type === 'App\Notifications\PostSaved')
                                             <span style="font-size: 1.2rem">{{ $notification->data['saver_name'] }}</span>
                                             <a class="text-secondary underline-hover" style="font-size: 1rem"
                                                 href="{{ route('posts.show', ['slug' => $notification->data['post_slug']]) }}"
                                                 class="text-decoration-none text-dark">
-                                                saved your post: {{ $notification->data['post_title'] }}
+                                                saved your post: {!! Str::limit($notification->data['post_title'], 35) !!}
                                             </a>
                                         @endif
                                     </p>
@@ -105,7 +111,7 @@
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <p class="fw-light"><a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
                         class="underline-hover text-dark" style="cursor: pointer">{{ $user->username }}</a> > followers</p>
-                <h1 class="fw-semibold mb-4">{{ $user->followers->count() }} Followers</h1>
+                <h1 class="fw-semibold mb-4 mt-2">{{ $user->followers->count() }} Followers</h1>
                 @foreach ($user->followers as $follower)
                     <div class="mb-3">
                         <a class="d-flex text-decoration-none text-dark gap-3"
@@ -123,9 +129,16 @@
                                     </span>
                                 </div>
                             @endif
-                            <p class="underline-hover m-0 fs-5 my-auto">
-                                {{ $follower->name }}
-                            </p>
+                            <div class="d-flex flex-column ">
+                                <p class="underline-hover m-0 fs-5 my-auto">
+                                    {{ $follower->name }}
+                                </p>
+                                <div class="d-flex">
+                                    <p class="m-0 text-secondary">{{ $follower->followers()->count() }} Followers</p>
+                                    <span class="mx-1 align-middle">•</span>
+                                    <p class="m-0 text-secondary">{{ $follower->posts()->count() }} Posts</p>
+                                </div>
+                            </div>
                             <form class="m-0 my-auto ms-auto" id="follow-form">
                                 @csrf
                                 <input type="hidden" name="followed_user_id" value="{{ $follower ? $follower->id : '' }}">
@@ -149,7 +162,7 @@
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <p class="fw-light"><a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
                         class="underline-hover text-dark" style="cursor: pointer">{{ $user->username }}</a> > following</p>
-                <h1 class="fw-semibold mb-3">{{ $user->following->count() }} Following</h1>
+                <h1 class="fw-semibold mb-4 mt-2">{{ $user->following->count() }} Following</h1>
                 @foreach ($user->following as $follow)
                     <div class="mb-3">
                         <a class="d-flex text-decoration-none text-dark gap-3"
@@ -167,9 +180,16 @@
                                     </span>
                                 </div>
                             @endif
-                            <p class="underline-hover m-0 fs-5 my-auto">
-                                {{ $follow->name }}
-                            </p>
+                            <div class="d-flex flex-column ">
+                                <p class="underline-hover m-0 fs-5 my-auto">
+                                    {{ $follow->name }}
+                                </p>
+                                <div class="d-flex">
+                                    <p class="m-0 text-secondary">{{ $follow->followers()->count() }} Followers</p>
+                                    <span class="mx-1 align-middle">•</span>
+                                    <p class="m-0 text-secondary">{{ $follow->posts()->count() }} Posts</p>
+                                </div>
+                            </div>
                             <form class="m-0 my-auto ms-auto" id="follow-form">
                                 @csrf
                                 <input type="hidden" name="followed_user_id" value="{{ $follow ? $follow->id : '' }}">
@@ -193,20 +213,14 @@
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <div class="d-flex justify-content-between align-items-center ">
                     <h1 class="m-0">{{ $user->name }}</h1>
-                    <svg data-bs-toggle="dropdown" width="24" height="24" style="cursor: pointer"
-                        viewBox="0 0 24 24" fill="none">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M4.39 12c0 .55.2 1.02.59 1.41.39.4.86.59 1.4.59.56 0 1.03-.2 1.42-.59.4-.39.59-.86.59-1.41 0-.55-.2-1.02-.6-1.41A1.93 1.93 0 0 0 6.4 10c-.55 0-1.02.2-1.41.59-.4.39-.6.86-.6 1.41zM10 12c0 .55.2 1.02.58 1.41.4.4.87.59 1.42.59.54 0 1.02-.2 1.4-.59.4-.39.6-.86.6-1.41 0-.55-.2-1.02-.6-1.41a1.93 1.93 0 0 0-1.4-.59c-.55 0-1.04.2-1.42.59-.4.39-.58.86-.58 1.41zm5.6 0c0 .55.2 1.02.57 1.41.4.4.88.59 1.43.59.57 0 1.04-.2 1.43-.59.39-.39.57-.86.57-1.41 0-.55-.2-1.02-.57-1.41A1.93 1.93 0 0 0 17.6 10c-.55 0-1.04.2-1.43.59-.38.39-.57.86-.57 1.41z"
-                            fill="currentColor"></path>
-                    </svg>
                 </div>
                 {{-- menu --}}
                 <div class="mt-4">
                     <div class="d-flex mb-4 border-bottom">
-                        <div class="me-5 pb-3 {{ $menu === 'all' || $menu === null ? 'border-bottom border-black' : '' }}"
+                        <div class="me-5 pb-3 {{ $menu === 'created' || $menu === null ? 'border-bottom border-black' : '' }}"
                             style="margin-bottom: -1px; font-size: .95rem">
-                            <a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
-                                class="nav-link">All Posts</a>
+                            <a href="{{ route('profile', ['username' => $user->username, 'menu' => 'created']) }}"
+                                class="nav-link">Created Posts</a>
                         </div>
                         <div class="me-5 pb-3 {{ $menu === 'saved' ? 'border-bottom border-black' : '' }}"
                             style="margin-bottom: -1px">
@@ -402,7 +416,7 @@
                     </div>
                 @endif
                 @if (auth()->id() == $user->id)
-                    <a href="{{ route('account.delete.form') }}" class="btn btn-danger">Delete Account</a>
+                    <a href="{{ route('account.delete.form') }}" class="btn btn-danger rounded-pill">Delete account</a>
                 @else
                     <form class="m-0" id="follow-form">
                         @csrf

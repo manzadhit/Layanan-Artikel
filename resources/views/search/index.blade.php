@@ -195,49 +195,57 @@
         @if ($results['authors']->isEmpty())
             <p class="text-center">No authors found</p>
         @else
-            @foreach ($results['authors'] as $author)
-                @if ($author->id !== auth()->id())
-                    <div class="mb-3">
-                        <a class="d-flex text-decoration-none text-dark gap-3"
-                            href="{{ route('profile', ['username' => $author->username]) }}" style="font-size: 0.9rem">
-                            @if ($author->profile_image)
-                                <img src="{{ asset('profile_images/' . $author->profile_image) }}" alt="Profile Picture"
-                                    class="rounded-circle" style="width: 45px; height: 45px; cursor: pointer"
-                                    data-bs-toggle="dropdown">
-                            @else
-                                <div id="profile-color"
-                                    class="text-white border-0 btn-secondary rounded-circle position-relative flex-shrink-0"
-                                    style="height: 45px; width: 45px; background-color: {{ $author->profile_color }}">
-                                    <span style="font-size: 2rem; pointer-events: none;"
-                                        class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $author->name[0] }}
-                                    </span>
+            <div class="d-flex flex-column col-8 mx-auto">
+                @foreach ($results['authors'] as $author)
+                    @if ($author->id !== auth()->id())
+                        <div class="mb-3">
+                            <a class="d-flex text-decoration-none text-dark gap-3"
+                                href="{{ route('profile', ['username' => $author->username]) }}"
+                                style="font-size: 0.9rem">
+                                @if ($author->profile_image)
+                                    <img src="{{ asset('profile_images/' . $author->profile_image) }}"
+                                        alt="Profile Picture" class="rounded-circle"
+                                        style="width: 45px; height: 45px; cursor: pointer" data-bs-toggle="dropdown">
+                                @else
+                                    <div id="profile-color"
+                                        class="text-white border-0 btn-secondary rounded-circle position-relative flex-shrink-0"
+                                        style="height: 45px; width: 45px; background-color: {{ $author->profile_color }}">
+                                        <span style="font-size: 2rem; pointer-events: none;"
+                                            class="m-0 text-center position-absolute top-50 start-50 translate-middle">{{ $author->name[0] }}
+                                        </span>
+                                    </div>
+                                @endif
+                                <div class="d-flex flex-column">
+                                    <p class="underline-hover m-0 fs-5 my-auto">
+                                        {{ $author->name }}
+                                    </p>
+                                    <div class="d-flex">
+                                        <p class="m-0 text-secondary">{{ $author->followers()->count() }} Followers</p>
+                                        <span class="mx-1 align-middle">•</span>
+                                        <p class="m-0 text-secondary">{{ $author->posts()->count() }} Posts</p>
+                                    </div>
                                 </div>
-                            @endif
-                            <div>
-                                <p class="underline-hover m-0 fs-5 my-auto">
-                                    {{ $author->name }}
-                                </p>
-                                <p class="m-0 text-secondary">{{ $author->posts()->count() }} Posts</p>
-                            </div>
-                            <form class="m-0 my-auto ms-auto" id="follow-form">
-                                @csrf
-                                <input type="hidden" name="followed_user_id" value="{{ $author ? $author->id : '' }}">
-                                <div class="p-0 m-0">
-                                    @if (auth()->id() != $author->id)
-                                        <button type="button" id="followBtn"
-                                            class="follow-btn rounded-pill {{ auth()->user()->isFollowing($author) ? 'border-success text-success' : 'btn-success' }} btn"
-                                            style="cursor: pointer;"
-                                            data-following="{{ auth()->user()->isFollowing($author) ? 'true' : 'false' }}"
-                                            data-user-id="{{ $author->id }}">
-                                            {{ auth()->user()->isFollowing($author) ? 'Following' : 'Follow' }}
-                                        </button>
-                                    @endif
-                                </div>
-                            </form>
-                        </a>
-                    </div>
-                @endif
-            @endforeach
+                                <form class="m-0 my-auto ms-auto" id="follow-form">
+                                    @csrf
+                                    <input type="hidden" name="followed_user_id"
+                                        value="{{ $author ? $author->id : '' }}">
+                                    <div class="p-0 m-0">
+                                        @if (auth()->id() != $author->id)
+                                            <button type="button" id="followBtn"
+                                                class="follow-btn rounded-pill {{ auth()->user()->isFollowing($author) ? 'border-success text-success' : 'btn-success' }} btn"
+                                                style="cursor: pointer;"
+                                                data-following="{{ auth()->user()->isFollowing($author) ? 'true' : 'false' }}"
+                                                data-user-id="{{ $author->id }}">
+                                                {{ auth()->user()->isFollowing($author) ? 'Following' : 'Follow' }}
+                                            </button>
+                                        @endif
+                                    </div>
+                                </form>
+                            </a>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
             {{ $results['authors']->appends(request()->query())->links() }}
         @endif
     @elseif(isset($results['categories']))

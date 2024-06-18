@@ -23,16 +23,6 @@ class ProfileController extends Controller
             abort(404, 'User not found');
         }
 
-        // Fungsi untuk mengambil teks pertama dalam tag <p>
-        $getFirstTagRegex = function ($content) {
-            preg_match('/<p>(.*?)<\/p>/s', $content, $matches);
-            if (isset($matches[1])) {
-                return strip_tags($matches[1]);
-            } else {
-                return 'No <p> tag found';
-            }
-        };
-
         $followedUsers = $user->following()->latest()->limit(5)->get();
 
         // Mengambil postingan atau notifikasi berdasarkan menu yang dipilih
@@ -70,6 +60,9 @@ class ProfileController extends Controller
             case 'liked':
                 $posts = $user->likes()->with('post')->latest()->get()->pluck('post');
                 break;
+            case "created":
+                $posts = $user->posts()->latest()->get();
+                break;
             default:
                 $posts = $user->posts()->latest()->get();
                 break;
@@ -80,6 +73,20 @@ class ProfileController extends Controller
         $posts->each(function ($post) {
             $post->isSaved = $post->savedByUsers()->where('user_id', auth()->id())->exists();
         });
+
+        // Mendefinisikan fungsi getFirstTagRegex sebagai variabel
+        $getFirstTagRegex = function ($content) {
+            preg_match('/<p>(.*?)<\/p>/s', $content, $matches);
+            // Periksa apakah $matches memiliki kunci indeks 1
+            if (isset($matches[1])) {
+                // Menghapus tag <figure> jika ada di dalam teks
+                $text = strip_tags($matches[1]);
+                return $text;
+            } else {
+                // Jika tidak ada tag <p> yang ditemukan, kembalikan pesan atau nilai default
+                return '';
+            }
+        };
 
         return view('profile.index', compact('user_login', 'user', 'posts', 'menu', 'getFirstTagRegex', 'followedUsers'));
     }
