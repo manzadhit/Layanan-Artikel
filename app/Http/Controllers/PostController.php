@@ -10,9 +10,8 @@ use App\Models\Category;
 use App\Models\PostImage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
@@ -155,31 +154,6 @@ class PostController extends Controller
         return redirect()->route('posts.show', $post->slug)->with('success', 'Post updated successfully.');
     }
 
-    private function flattenFigures($dom, $parentNode, $childNode, &$lastFigure)
-    {
-        $figures = $childNode->getElementsByTagName('figure');
-        while ($figures->length > 0) {
-            foreach ($figures as $figure) {
-                $imgs = $figure->getElementsByTagName('img');
-                foreach ($imgs as $img) {
-                    $newFigure = $dom->createElement('figure');
-                    $newFigure->setAttribute('class', 'image');
-                    $newFigure->appendChild($img->cloneNode(true));
-
-                    if ($lastFigure !== null) {
-                        $parentNode->insertBefore($newFigure, $lastFigure->nextSibling);
-                    } else {
-                        $parentNode->insertBefore($newFigure, $childNode->nextSibling);
-                    }
-
-                    $lastFigure = $newFigure;
-                }
-                $childNode->removeChild($figure);
-            }
-            $figures = $childNode->getElementsByTagName('figure');
-        }
-    }
-
     private function processImagesForUpdate(Post $post, $newContent, $oldContent)
     {
         $oldImages = $this->extractImagePaths($oldContent);
@@ -189,13 +163,6 @@ class PostController extends Controller
         $dom = new \DomDocument();
         $dom->loadHTML(mb_convert_encoding($newContent, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
-
-        // Flatten nested figures
-        $figures = $dom->getElementsByTagName('figure');
-        $lastFigure = null;
-        foreach ($figures as $figure) {
-            $this->flattenFigures($dom, $figure->parentNode, $figure, $lastFigure);
-        }
 
         $images = $dom->getElementsByTagName('img');
 
@@ -224,19 +191,6 @@ class PostController extends Controller
             }
         }
 
-        // Move paragraphs outside of figures if any remain
-        $figures = $dom->getElementsByTagName('figure');
-        foreach ($figures as $figure) {
-            $paragraphs = $figure->getElementsByTagName('p');
-            $toMove = [];
-            foreach ($paragraphs as $p) {
-                $toMove[] = $p;
-            }
-            foreach ($toMove as $p) {
-                $figure->parentNode->insertBefore($p, $figure->nextSibling);
-            }
-        }
-
         $post->content = $dom->saveHTML();
 
         // Remove unused images
@@ -247,6 +201,7 @@ class PostController extends Controller
             $this->removeImage($image);
         }
     }
+
 
     public function destroy($slug)
     {
@@ -266,8 +221,20 @@ class PostController extends Controller
         // Hapus post
         $post->delete();
 
+        // Cek URL sebelumnya
+        $previousUrl = url()->previous();
+
+        // Jika URL sebelumnya adalah /posts/slug, redirect ke /
+        if (parse_url($previousUrl, PHP_URL_PATH) == "/posts/$slug") {
+            return redirect('/')->with('success', 'Post dan gambar terkait berhasil dihapus.');
+        }
+
+        // Jika tidak, redirect ke URL sebelumnya
         return redirect()->back()->with('success', 'Post dan gambar terkait berhasil dihapus.');
     }
+
+
+
 
     private function removeUnusedImages($oldContent, $newContent)
     {
@@ -324,13 +291,6 @@ class PostController extends Controller
         $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
-        // Flatten nested figures
-        $figures = $dom->getElementsByTagName('figure');
-        $lastFigure = null;
-        foreach ($figures as $figure) {
-            $this->flattenFigures($dom, $figure->parentNode, $figure, $lastFigure);
-        }
-
         $images = $dom->getElementsByTagName('img');
         $processedImages = [];
 
@@ -351,19 +311,6 @@ class PostController extends Controller
                 $this->updateImageAttributes($img, $imageName);
             } else {
                 $this->updateRelativeImagePath($img);
-            }
-        }
-
-        // Move paragraphs outside of figures if any remain
-        $figures = $dom->getElementsByTagName('figure');
-        foreach ($figures as $figure) {
-            $paragraphs = $figure->getElementsByTagName('p');
-            $toMove = [];
-            foreach ($paragraphs as $p) {
-                $toMove[] = $p;
-            }
-            foreach ($toMove as $p) {
-                $figure->parentNode->insertBefore($p, $figure->nextSibling);
             }
         }
 
@@ -396,7 +343,7 @@ class PostController extends Controller
             $extension = 'jpg';
         }
 
-        $imageName = time() . '_' . Str::random(10) . '.jpg';
+        $imageName = time() . '_' . Str::random(10) . '.' . $extension;
 
         try {
             $imageData = file_get_contents($src);
@@ -410,7 +357,7 @@ class PostController extends Controller
                 $imageName = 'placeholder.jpg';
             }
         } catch (\Exception $e) {
-            // // Log error jika diperlukan
+            // Log error jika diperlukan
             // \Log::error('Failed to save external image: ' . $e->getMessage());
             // $imageName = 'placeholder.jpg';
         }

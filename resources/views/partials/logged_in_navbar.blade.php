@@ -109,7 +109,7 @@
                 @if (Auth::user()->role == 'admin')
                     <li>
                         <a class="m-0 text-decoration-none" id="profile-form"
-                            href="{{ route('dashboard', ['type' => 'users']) }}">
+                            href="{{ route('dashboard', ['type' => 'posts']) }}">
                             @csrf
 
                             <button type="submit" class="dropdown-item d-flex gap-2 align-items-center">

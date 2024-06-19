@@ -26,7 +26,7 @@
         }
 
         figure.image {
-            text-align: center;
+            /* text-align: center; */
             margin: 20px auto;
             max-width: 100%;
             /* Menjaga figure agar tidak melebihi lebar konten */
@@ -375,6 +375,31 @@
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.getElementById('deletePostForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (confirm('Anda yakin ingin menghapus post ini?')) {
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '{{ url('/') }}';
+                    } else {
+                        // Handle errors here, e.g. show an error message
+                        alert('Gagal menghapus post. Silakan coba lagi.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Gagal menghapus post. Silakan coba lagi.');
+                });
+            }
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var links = document.getElementsByTagName('a');

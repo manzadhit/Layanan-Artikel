@@ -15,18 +15,31 @@ class DashboardController extends Controller
 
         $query  = $request->input('q');
         $results = [];
-        $getFirstTagRegex = function ($content) {
-            preg_match('/<p>(.*?)<\/p>/s', $content, $matches);
-            // Periksa apakah $matches memiliki kunci indeks 1
-            if (isset($matches[1])) {
-                // Menghapus tag <figure> jika ada di dalam teks
-                $text = strip_tags($matches[1]);
-                return $text;
+        // Mendefinisikan fungsi getFirstTagRegex sebagai variabel
+        $getFirstTagRegex = function ($content, $count = 3) {
+            // Pola regex untuk menangkap tag <p> pertama hingga ketiga
+            preg_match_all('/<p[^>]*>(.*?)<\/p>/s', $content, $matches);
+
+            // Periksa apakah ada yang cocok dengan pola regex
+            if (!empty($matches[0])) {
+                // Ambil maksimal $count paragraf pertama
+                $texts = array_slice($matches[0], 0, $count);
+
+                // Hapus tag HTML dari setiap paragraf
+                $cleanedTexts = array_map(function ($text) {
+                    return strip_tags($text);
+                }, $texts);
+
+                // Gabungkan hasilnya menjadi satu teks
+                $combinedText = implode(' ', $cleanedTexts);
+
+                return $combinedText;
             } else {
                 // Jika tidak ada tag <p> yang ditemukan, kembalikan pesan atau nilai default
                 return '';
             }
         };
+
         if (isset($query)) {
 
             switch ($type) {
