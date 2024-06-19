@@ -32,6 +32,12 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/dashboard/{type}', [DashboardController::class, 'index'])->name('dashboard');
+  Route::delete('/dashboard/{type}/user/{user}', [DashboardController::class, 'deleteUser'])->name('dashboard.user.delete');
+  Route::delete('/dashboard/{type}/category/{category}', [DashboardController::class, 'deleteCategory'])->name('dashboard.category.delete');
+  Route::get('/dashboard/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+  Route::post('/dashboard/categories', [CategoryController::class, 'store'])->name('categories.store');
+  Route::get('/dashboard/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+  Route::put('/dashboard/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
 });
 
 // Rute yang membutuhkan autentikasi

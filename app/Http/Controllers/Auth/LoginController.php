@@ -24,7 +24,7 @@ class LoginController extends Controller
             // Cek peran pengguna setelah berhasil login
             if (Auth::user()->role === 'admin') {
                 // Redirect ke dashboard admin jika pengguna adalah admin
-                return redirect()->route('dashboard');
+                return redirect()->route('dashboard', ["type" => "posts"]);
             } else {
                 // Redirect ke halaman utama (home) jika pengguna adalah user biasa
                 return redirect()->route('home');

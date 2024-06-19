@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use App\Notifications\NewUserNotification;
 
 class RegisterController extends Controller
 {
@@ -62,6 +63,12 @@ class RegisterController extends Controller
 
         // Simpan user ke database
         $user->save();
+
+        // Notify admin
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new NewUserNotification($user));
+        }
 
         return $user;
     }

@@ -31,12 +31,6 @@
                 @if ($notifications->isNotEmpty())
                     <h1 class="fw-semibold mb-5 mt-3">{{ $notifications->count() }} Notifications</h1>
                     @foreach ($notifications as $index => $notification)
-                        @php
-                            $postTitle = $notification->data['post_title'];
-                            $words = explode(' ', $postTitle);
-                            $limitedWords = array_slice($words, 0, 5);
-                            $shortTitle = implode(' ', $limitedWords);
-                        @endphp
                         <div class="d-flex gap-3 mb-4">
                             <!-- Link gambar profil -->
                             <a href="{{ route('profile', ['username' => $userResponded[$index]->username]) }}"
@@ -89,6 +83,10 @@
                                                 class="text-decoration-none text-dark">
                                                 saved your post: {!! Str::limit($notification->data['post_title'], 35) !!}
                                             </a>
+                                        @elseif ($notification->type === 'App\Notifications\NewUserNotification')
+                                            <span style="font-size: 1.2rem">A new user has
+                                                registered.</span>
+                                            <span class="text-secondary underline-hover" style="font-size: 1rem">{{ $userResponded[$index]->name }}</span>
                                         @endif
                                     </p>
                                 </a>

@@ -45,7 +45,10 @@ class ProfileController extends Controller
                     } elseif ($notification->type === 'App\Notifications\PostCommented') {
                         // Notifikasi postingan yang dikomentari
                         return User::find($notification->data["commenter_id"] ?? null);
-                    } else {
+                    } elseif ($notification->type === 'App\Notifications\NewUserNotification') {
+                        // Notifikasi postingan yang dikomentari
+                        return User::find($notification->data["user_id"] ?? null);
+                    }else {
                         // Handle other types of notifications here
                         return null;
                     }
