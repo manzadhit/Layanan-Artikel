@@ -36,7 +36,7 @@ class AccountController extends Controller
             ->delete();
 
         // Hapus semua notifikasi yang memiliki user_id terkait
-        DatabaseNotification::where('data->user_id', (string) $user->id)
+        DatabaseNotification::where('data->user_id', $user->id)
             ->delete();
 
         // Hapus laporan yang terkait dengan user secara langsung

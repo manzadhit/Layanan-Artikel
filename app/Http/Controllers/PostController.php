@@ -235,6 +235,9 @@ class PostController extends Controller
             ->where('data->reportable_type', 'App\\Models\\Post')
             ->delete();
 
+        DatabaseNotification::where('data->post_id', $post->id)
+        ->delete();
+
         // Hapus laporan terkait dengan post
         Report::where('reportable_id', $post->id)
             ->where('reportable_type', 'App\\Models\\Post')
