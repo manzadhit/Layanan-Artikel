@@ -143,13 +143,6 @@
                             </button>
                         </form>
                     @endif
-                    {{-- share form --}}
-                    <svg id="share-button" width="24" height="24" style="cursor: pointer" viewBox="0 0 24 24"
-                        fill="none">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M15.22 4.93a.42.42 0 0 1-.12.13h.01a.45.45 0 0 1-.29.08.52.52 0 0 1-.3-.13L12.5 3v7.07a.5.5 0 0 1-.5.5.5.5 0 0 1-.5-.5V3.02l-2 2a.45.45 0 0 1-.57.04h-.02a.4.4 0 0 1-.16-.3.4.4 0 0 1 .1-.32l2.8-2.8a.5.5 0 0 1 .7 0l2.8 2.8a.42.42 0 0 1 .07.5zm-.1.14zm.88 2h1.5a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2H8a.5.5 0 0 1 .35.14c.1.1.15.22.15.35a.5.5 0 0 1-.15.35.5.5 0 0 1-.35.15H6.4c-.5 0-.9.4-.9.9v10.2a.9.9 0 0 0 .9.9h11.2c.5 0 .9-.4.9-.9V8.96c0-.5-.4-.9-.9-.9H16a.5.5 0 0 1 0-1z"
-                            fill="currentColor"></path>
-                    </svg>
                     {{-- other form --}}
                     @if (auth()->check())
                         <div class="dropdown">
@@ -159,8 +152,9 @@
                                     d="M4.39 12c0 .55.2 1.02.59 1.41.39.4.86.59 1.4.59.56 0 1.03-.2 1.42-.59.4-.39.59-.86.59-1.41 0-.55-.2-1.02-.6-1.41A1.93 1.93 0 0 0 6.4 10c-.55 0-1.02.2-1.41.59-.4.39-.6.86-.6 1.41zM10 12c0 .55.2 1.02.58 1.41.4.4.87.59 1.42.59.54 0 1.02-.2 1.4-.59.4-.39.6-.86.6-1.41 0-.55-.2-1.02-.6-1.41a1.93 1.93 0 0 0-1.4-.59c-.55 0-1.04.2-1.42.59-.4.39-.58.86-.58 1.41zm5.6 0c0 .55.2 1.02.57 1.41.4.4.88.59 1.43.59.57 0 1.04-.2 1.43-.59.39-.39.57-.86.57-1.41 0-.55-.2-1.02-.57-1.41A1.93 1.93 0 0 0 17.6 10c-.55 0-1.04.2-1.43.59-.38.39-.57.86-.57 1.41z"
                                     fill="currentColor"></path>
                             </svg>
-                            <ul class="dropdown-menu" id="report-dropdown" style="min-width: 120px; font-size: .95rem">
+                            <ul class="dropdown-menu p-2" id="report-dropdown" style="min-width: 200px; font-size: .95rem">
                                 @if (auth()->check() && auth()->id() == $post->user->id)
+                                    {{-- User yang sedang login adalah pemilik post --}}
                                     <li>
                                         <a class="m-0 text-decoration-none" id="profile-form"
                                             href="{{ route('posts.edit', ['slug' => $post->slug]) }}">
@@ -178,17 +172,45 @@
                                             @method('DELETE')
                                             <button type="submit"
                                                 class="dropdown-item d-flex align-items-center text-danger"
-                                                onclick="return confirm('Anda yakin ingin menghapus post ini?')">Delete
-                                                post</button>
+                                                onclick="return confirm('Anda yakin ingin menghapus post ini?')">
+                                                Delete post
+                                            </button>
+                                        </form>
+                                    </li>
+                                @elseif (auth()->check() && auth()->user()->role == 'admin')
+                                    {{-- User yang sedang login adalah admin --}}
+                                    <li>
+                                        <form action="{{ route('posts.destroy', $post->slug) }}" method="POST"
+                                            class="mb-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="dropdown-item d-flex align-items-center text-danger"
+                                                onclick="return confirm('Anda yakin ingin menghapus post ini?')">
+                                                Delete post
+                                            </button>
                                         </form>
                                     </li>
                                 @else
+                                    {{-- Untuk pengguna biasa --}}
                                     <li>
-                                        <button type="button"
-                                            class="dropdown-item d-flex align-items-center text-center text-danger"
-                                            id="reportPostBtn">
-                                            Report post
-                                        </button>
+                                        <form class="m-0 d-flex align-items-center text-center" id="follow-form">
+                                            @csrf
+                                            <input type="hidden" name="followed_user_id"
+                                                value="{{ $post->user ? $post->user->id : '' }}">
+                                            <button type="button" id="followBtn"
+                                                class="follow-btn dropdown-item d-flex align-items-center text-center text"
+                                                style="cursor: pointer;"
+                                                data-following="{{ auth()->user()->isFollowing($post->user)? 'true': 'false' }}"
+                                                data-user-id="{{ $post->user->id }}">
+                                                {{ auth()->user()->isFollowing($post->user)? 'Unfollow author': 'Follow author' }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        @include('../partials.report_form', [
+                                            'reportable' => $post,
+                                        ])
                                     </li>
                                 @endif
                             </ul>
@@ -197,8 +219,9 @@
                 </div>
             </div>
             {{-- Content --}}
-            <div>
-                <p>{!! $post->content !!}</p>
+            <div class="outer-div">
+                <p></p>
+                {!! $post->content !!}
             </div>
             {{-- Categories --}}
             <div class="d-flex">
@@ -306,14 +329,23 @@
                                                             </button>
                                                         </form>
                                                     </li>
-                                                @else
+                                                @elseif (auth()->check() && auth()->user()->role == 'admin')
                                                     <li>
-                                                        <button type="button"
-                                                            class="dropdown-item d-flex align-items-center text-center text-danger"
-                                                            id="reportCommentBtn" data-comment-id="{{ $comment->id }}">
-                                                            Report comment
-                                                        </button>
+                                                        <form action="{{ route('comment.delete', $comment->id) }}"
+                                                            method="POST" class="mb-0">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                class="dropdown-item d-flex align-items-center text-danger"
+                                                                onclick="return confirm('Are you sure you want to delete this comment?')">
+                                                                Delete comment
+                                                            </button>
+                                                        </form>
                                                     </li>
+                                                @else
+                                                    @include('../partials.report_form', [
+                                                        'reportable' => $comment,
+                                                    ])
                                                 @endif
                                             </ul>
                                         </div>
@@ -375,6 +407,11 @@
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('figure.image_resized').removeAttr('style');
+        });
+    </script>
     <script>
         document.getElementById('deletePostForm').addEventListener('submit', function(event) {
             event.preventDefault();

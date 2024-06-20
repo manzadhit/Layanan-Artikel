@@ -8,18 +8,19 @@ use App\Http\Controllers\PostController;
 use App\Http\Middleware\ConfirmPassword;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DashboardController;
 
-// URL::forceScheme('https');
+URL::forceScheme('https');
 
 // Rute untuk registrasi
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
@@ -42,6 +43,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 // Rute yang membutuhkan autentikasi
 Route::middleware(['auth'])->group(function () {
+  Route::post('/report', [ReportController::class, 'store'])->name('report.store');
+
   Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
   Route::post('/posts/create', [PostController::class, 'store'])->name('posts.store');
 

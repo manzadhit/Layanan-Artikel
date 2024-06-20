@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Report;
 use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Notifications\DatabaseNotification;
 
 class DashboardController extends Controller
 {
@@ -91,12 +93,55 @@ class DashboardController extends Controller
     public function deleteUser($type, User $user)
     {
         try {
+            // Hapus notifikasi yang terkait dengan user secara langsung
+            DatabaseNotification::where('data->reportable_id', (string) $user->id)
+                ->where('data->reportable_type', 'App\\Models\\User')
+                ->delete();
+
+            // Hapus semua notifikasi yang memiliki user_id terkait
+            DatabaseNotification::where('data->user_id', (string) $user->id)
+                ->delete();
+
+            // Hapus laporan yang terkait dengan user secara langsung
+            Report::where('reportable_id', $user->id)
+                ->where('reportable_type', 'App\\Models\\User')
+                ->delete();
+
+            // Hapus notifikasi dan laporan yang terkait dengan post yang dimiliki oleh user
+            foreach ($user->posts as $post) {
+                DatabaseNotification::where('data->reportable_id', (string) $post->id)
+                    ->where('data->reportable_type', 'App\\Models\\Post')
+                    ->delete();
+
+                Report::where('reportable_id', $post->id)
+                    ->where('reportable_type', 'App\\Models\\Post')
+                    ->delete();
+
+                // Hapus notifikasi dan laporan terkait dengan komentar di post ini
+                foreach ($post->comments as $comment) {
+                    DatabaseNotification::where('data->reportable_id', (string) $comment->id)
+                        ->where('data->reportable_type', 'App\\Models\\Comment')
+                        ->delete();
+
+                    Report::where('reportable_id', $comment->id)
+                        ->where('reportable_type', 'App\\Models\\Comment')
+                        ->delete();
+                }
+            }
+
+            // Hapus notifikasi dan laporan yang dibuat oleh user
+            Report::where('user_id', $user->id)->delete();
+
+            // Hapus user
             $user->delete();
-            return redirect()->route('dashboard', ['type' => $type])->with('success', 'User deleted successfully.');
+
+            return redirect()->back()->with('success', 'User deleted successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('dashboard', ['type' => $type])->with('error', 'Failed to delete user.');
+            return redirect()->back()->with('error', 'Failed to delete user.');
         }
     }
+
+
 
     public function deleteCategory($type, Category $category)
     {

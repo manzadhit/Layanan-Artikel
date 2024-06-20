@@ -298,3 +298,52 @@
         <p>No results found</p>
     @endif
 @endsection
+
+@push('scripts')
+        <script>
+        $(document).ready(function() {
+            // Handler untuk tombol follow
+            $(document).on('click', '.follow-btn', function() {
+                    var btn = $(this);
+                    var isFollowing = btn.data('following') === 'true';
+                    var userId = btn.data('user-id');
+
+                    @auth
+                    var authUserId = {{ auth()->id() }};
+                    $.ajax({
+                        url: "{{ secure_url(route('toggle.follow', ['userId' => ':userId'])) }}"
+                            .replace(':userId', authUserId),
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            followed_user_id: userId
+                        },
+                        success: function(response) {
+                            if (response.isFollowing) {
+                                btn.text('Following').data('following', 'true');
+                            } else {
+                                btn.text('Follow').data('following', 'false');
+                            }
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 200); // Delay 300ms
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText);
+                            alert('An error occurred. Please try again.');
+                        }
+                    });
+                @else
+                    // Jika pengguna belum login, arahkan ke halaman login
+                    window.location.href = "{{ route('login') }}";
+                @endauth
+            });
+
+        // Handler untuk tombol "Login to Follow"
+        $(document).on('click', '#loginToFollowBtn', function() {
+            window.location.href = "{{ route('login') }}";
+        });
+        });
+    </script>
+@endpush

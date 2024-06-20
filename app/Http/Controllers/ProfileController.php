@@ -34,22 +34,20 @@ class ProfileController extends Controller
                 $notifications = $user->notifications()->latest()->get();
                 $userResponded = $notifications->map(function ($notification) {
                     if ($notification->type === 'App\Notifications\UserFollowed') {
-                        // Notifikasi pengguna yang diikuti
                         return User::find($notification->data["follower_id"] ?? null);
                     } elseif ($notification->type === 'App\Notifications\PostLiked') {
-                        // Notifikasi postingan yang disukai
                         return User::find($notification->data["liker_id"] ?? null);
                     } elseif ($notification->type === 'App\Notifications\PostSaved') {
-                        // Notifikasi postingan yang disimpan
                         return User::find($notification->data["saver_id"] ?? null);
                     } elseif ($notification->type === 'App\Notifications\PostCommented') {
-                        // Notifikasi postingan yang dikomentari
                         return User::find($notification->data["commenter_id"] ?? null);
                     } elseif ($notification->type === 'App\Notifications\NewUserNotification') {
-                        // Notifikasi postingan yang dikomentari
                         return User::find($notification->data["user_id"] ?? null);
-                    }else {
-                        // Handle other types of notifications here
+                    } elseif ($notification->type === 'App\Notifications\NewPostNotification') {
+                        return User::find($notification->data["user_id"] ?? null);
+                    } elseif ($notification->type === 'App\Notifications\ReportNotification') {
+                        return User::find($notification->data["user_id"] ?? null);
+                    } else {
                         return null;
                     }
                 })->filter();
@@ -57,12 +55,15 @@ class ProfileController extends Controller
                 $user->unreadNotifications->markAsRead();
 
                 return view('profile.index', compact('user', 'notifications', 'userResponded', 'menu', 'user_login', 'followedUsers'));
+
             case 'saved':
                 $posts = $user->savedPosts()->latest('saved_posts.created_at')->get();
                 break;
+
             case 'liked':
                 $posts = $user->likes()->with('post')->latest()->get()->pluck('post');
                 break;
+
             case "created":
                 $posts = $user->posts()->latest()->get();
                 break;
@@ -71,40 +72,30 @@ class ProfileController extends Controller
                 break;
         }
 
-        // Mengambil daftar pengguna yang diikuti
-
         $posts->each(function ($post) {
             $post->isSaved = $post->savedByUsers()->where('user_id', auth()->id())->exists();
         });
 
-        // Mendefinisikan fungsi getFirstTagRegex sebagai variabel
         $getFirstTagRegex = function ($content, $count = 3) {
-            // Pola regex untuk menangkap tag <p> pertama hingga ketiga
             preg_match_all('/<p[^>]*>(.*?)<\/p>/s', $content, $matches);
 
-            // Periksa apakah ada yang cocok dengan pola regex
             if (!empty($matches[0])) {
-                // Ambil maksimal $count paragraf pertama
                 $texts = array_slice($matches[0], 0, $count);
-
-                // Hapus tag HTML dari setiap paragraf
                 $cleanedTexts = array_map(function ($text) {
                     return strip_tags($text);
                 }, $texts);
 
-                // Gabungkan hasilnya menjadi satu teks
                 $combinedText = implode(' ', $cleanedTexts);
 
                 return $combinedText;
             } else {
-                // Jika tidak ada tag <p> yang ditemukan, kembalikan pesan atau nilai default
                 return '';
             }
         };
 
-
         return view('profile.index', compact('user_login', 'user', 'posts', 'menu', 'getFirstTagRegex', 'followedUsers'));
     }
+
     public function edit($username)
     {
         $user = User::where('username', $username)->first();

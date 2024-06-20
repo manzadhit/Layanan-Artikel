@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Report;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Notifications\PostCommented;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Notifications\DatabaseNotification;
 
 class CommentController extends Controller
 {
@@ -70,10 +72,21 @@ class CommentController extends Controller
             return response()->json(['message' => 'Unauthorized!'], 403);
         }
 
+        // Hapus notifikasi yang terkait dengan comment
+        DatabaseNotification::where('data->reportable_id', (string) $comment->id)
+            ->where('data->reportable_type', 'App\\Models\\Comment')
+            ->delete();
+
+        // Hapus laporan yang terkait dengan comment
+        Report::where('reportable_id', $comment->id)
+            ->where('reportable_type', 'App\\Models\\Comment')
+            ->delete();
+
         // Hapus comment dari database
         $comment->delete();
 
         // Redirect pengguna kembali ke halaman sebelumnya dengan pesan sukses
         return redirect()->back()->with('success', 'Comment deleted!');
     }
+
 }

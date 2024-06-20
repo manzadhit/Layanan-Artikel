@@ -51,7 +51,9 @@
                 @endforeach
             @else
                 <!-- Tampilkan sesuatu untuk pengguna yang belum login -->
-                <a class="text-decoration-none text-dark" href="{{ route("login") }}"><p class="underline-hover">Login to see other categories</p></a>
+                <a class="text-decoration-none text-dark" href="{{ route('login') }}">
+                    <p class="underline-hover">Login to see other categories</p>
+                </a>
             @endauth
         </div>
         @if ($posts->count())
@@ -139,8 +141,9 @@
                                                         fill="currentColor"></path>
                                                 </svg>
                                                 <ul class="dropdown-menu p-2" id="report-dropdown"
-                                                    style="min-width: 150px; font-size: .95rem">
+                                                    style="min-width: 200px; font-size: .95rem">
                                                     @if (auth()->check() && auth()->id() == $post->user->id)
+                                                        {{-- User yang sedang login adalah pemilik post --}}
                                                         <li>
                                                             <a class="m-0 text-decoration-none" id="profile-form"
                                                                 href="{{ route('posts.edit', ['slug' => $post->slug]) }}">
@@ -158,11 +161,27 @@
                                                                 @method('DELETE')
                                                                 <button type="submit"
                                                                     class="dropdown-item d-flex align-items-center text-danger"
-                                                                    onclick="return confirm('Anda yakin ingin menghapus post ini?')">Delete
-                                                                    post</button>
+                                                                    onclick="return confirm('Anda yakin ingin menghapus post ini?')">
+                                                                    Delete post
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    @elseif (auth()->check() && auth()->user()->role == 'admin')
+                                                        {{-- User yang sedang login adalah admin --}}
+                                                        <li>
+                                                            <form action="{{ route('posts.destroy', $post->slug) }}"
+                                                                method="POST" class="mb-0">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="dropdown-item d-flex align-items-center text-danger"
+                                                                    onclick="return confirm('Anda yakin ingin menghapus post ini?')">
+                                                                    Delete post
+                                                                </button>
                                                             </form>
                                                         </li>
                                                     @else
+                                                        {{-- Untuk pengguna biasa --}}
                                                         <li>
                                                             <form class="m-0 d-flex align-items-center text-center"
                                                                 id="follow-form">
@@ -179,11 +198,9 @@
                                                             </form>
                                                         </li>
                                                         <li>
-                                                            <button type="button"
-                                                                class="dropdown-item d-flex align-items-center text-center text-danger"
-                                                                id="reportPostBtn">
-                                                                Report post
-                                                            </button>
+                                                            @include('../partials.report_form', [
+                                                                'reportable' => $post,
+                                                            ])
                                                         </li>
                                                     @endif
                                                 </ul>
@@ -218,6 +235,16 @@
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Dropdown submenu
+        $(document).ready(function() {
+            $('.dropdown-submenu a.dropdown-toggle').on("click", function(e) {
+                $(this).next('ul').toggle();
+                e.stopPropagation();
+                e.preventDefault();
+            });
+        });
+    </script>
     <script>
         $(document).ready(function() {
             $('.save-button').on('click', function() {

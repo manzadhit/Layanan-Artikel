@@ -25,7 +25,8 @@
     <div class="d-flex h-100 w-100 row">
         @if ($menu == 'notifications')
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
-                <p class="fw-light"><a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
+                <p class="fw-light">
+                    <a href="{{ route('profile', ['username' => $user->username, 'menu' => 'all']) }}"
                         class="underline-hover text-dark" style="cursor: pointer">{{ $user->name }}</a> > notifications
                 </p>
                 @if ($notifications->isNotEmpty())
@@ -84,13 +85,42 @@
                                                 saved your post: {!! Str::limit($notification->data['post_title'], 35) !!}
                                             </a>
                                         @elseif ($notification->type === 'App\Notifications\NewUserNotification')
-                                            <span style="font-size: 1.2rem">A new user has
-                                                registered.</span>
-                                            <span class="text-secondary underline-hover" style="font-size: 1rem">{{ $userResponded[$index]->name }}</span>
+                                            <span style="font-size: 1.2rem">A new user has registered.</span>
+                                            <span class="text-secondary underline-hover"
+                                                style="font-size: 1rem">{{ $userResponded[$index]->name }}</span>
+                                        @elseif ($notification->type === 'App\Notifications\NewPostNotification')
+                                            <span style="font-size: 1.2rem">{{ $userResponded[$index]->name }}</span>
+                                            <a class="text-secondary underline-hover" style="font-size: 1rem"
+                                                href="{{ route('posts.show', ['slug' => $notification->data['post_slug']]) }}"
+                                                class="text-decoration-none text-dark">
+                                                create new post {!! Str::limit($notification->data['post_title'], 35) !!}
+                                            </a>
+                                        @elseif ($notification->type === 'App\Notifications\ReportNotification')
+                                            <span style="font-size: 1.2rem">{{ $userResponded[$index]->name }}</span>
+                                            @php
+                                                $reportable = $notification->data['reportable_type']::find(
+                                                    $notification->data['reportable_id'],
+                                                );
+                                                $reportableType = class_basename(
+                                                    $notification->data['reportable_type'],
+                                                );
+                                            @endphp
+                                            @if ($reportableType == 'Post')
+                                                <a href="{{ route('posts.show', ['slug' => $reportable->slug]) }}"
+                                                    class="text-secondary underline-hover" style="font-size: 1rem">
+                                                    reported a {{ $reportableType }}
+                                                    <span class="text-danger">{!! Str::limit($reportable->title, 28) !!}</span>
+                                            @elseif ($reportableType == 'User')
+                                                <a href="{{ route('profile', ['username' => $reportable->username]) }}" class="text-secondary underline-hover" style="font-size: 1rem"> reported a {{ $reportableType }} <span class="text-danger">{{ $reportable->name }}</span>
+                                            @elseif ($reportableType == 'Comment')
+                                                <a href="{{ route('posts.show', ['slug' => $reportable->post->slug]) }}" class="text-secondary underline-hover" style="font-size: 1rem"> reported a {{ $reportableType }}: <span class="text-danger">{{ Str::limit($reportable->content, 30) }}</span>
+                                                 <a class="text-secondary underline-hover" href="{{ route('profile', ['username' => $reportable->user->username]) }}">Created by: {{ $reportable->user->name }}</a>
+                                            @endif
+                                            for:
+                                            <span class="text-danger">{{ $notification->data['reason'] }}</span>
                                         @endif
                                     </p>
                                 </a>
-
                                 <small class="text-secondary m-0">{{ $notification->created_at->diffForHumans() }}</small>
                             </div>
                             <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST">
@@ -103,7 +133,6 @@
                 @else
                     <p class="text-center fs-4 mt-5">No notifications found</p>
                 @endif
-
             </div>
         @elseif ($menu == 'followers')
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
@@ -211,6 +240,49 @@
             <div class="col-8 border-end d-flex flex-column pe-5 pt-5">
                 <div class="d-flex justify-content-between align-items-center ">
                     <h1 class="m-0">{{ $user->name }}</h1>
+                    @if (auth()->check())
+                        <div class="dropdown">
+                            <svg id="report-button" data-bs-toggle="dropdown" width="24" height="24"
+                                style="cursor: pointer" viewBox="0 0 24 24" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M4.39 12c0 .55.2 1.02.59 1.41.39.4.86.59 1.4.59.56 0 1.03-.2 1.42-.59.4-.39.59-.86.59-1.41 0-.55-.2-1.02-.6-1.41A1.93 1.93 0 0 0 6.4 10c-.55 0-1.02.2-1.41.59-.4.39-.6.86-.6 1.41zM10 12c0 .55.2 1.02.58 1.41.4.4.87.59 1.42.59.54 0 1.02-.2 1.4-.59.4-.39.6-.86.6-1.41 0-.55-.2-1.02-.6-1.41a1.93 1.93 0 0 0-1.4-.59c-.55 0-1.04.2-1.42.59-.4.39-.58.86-.58 1.41zm5.6 0c0 .55.2 1.02.57 1.41.4.4.88.59 1.43.59.57 0 1.04-.2 1.43-.59.39-.39.57-.86.57-1.41 0-.55-.2-1.02-.57-1.41A1.93 1.93 0 0 0 17.6 10c-.55 0-1.04.2-1.43.59-.38.39-.57.86-.57 1.41z"
+                                    fill="currentColor"></path>
+                            </svg>
+                            <ul class="dropdown-menu" id="report-dropdown" style="min-width: 120px; font-size: .95rem">
+                                @if (auth()->id() == $user->id)
+                                    {{-- Pengguna yang sedang login adalah pemilik profil --}}
+                                    <li>
+                                        <a href="{{ route('profile', ['username' => $user->username]) }}"
+                                            class="dropdown-item d-flex align-items-center text-center edit-profile-btn">
+                                            Edit profile
+                                        </a>
+                                    </li>
+                                @elseif (auth()->user()->role == 'admin')
+                                    {{-- Pengguna yang sedang login adalah admin --}}
+                                    <li>
+                                        <form
+                                            action="{{ route('dashboard.user.delete', ['type' => 'users', 'user' => $user->id]) }}"
+                                            method="POST" class="mb-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="dropdown-item d-flex align-items-center text-danger"
+                                                onclick="return confirm('Are you sure you want to delete this user?')">
+                                                Delete user
+                                            </button>
+                                        </form>
+                                    </li>
+                                @else
+                                    <li>
+                                        @include('../partials.report_form', [
+                                            'reportable' => $user,
+                                        ])
+                                    </li>
+                                @endif
+                            </ul>
+                        </div>
+                    @endif
+
                 </div>
                 {{-- menu --}}
                 <div class="mt-4">
@@ -359,13 +431,9 @@
                                                                         </button>
                                                                     </form>
                                                                 </li>
-                                                                <li>
-                                                                    <button type="button"
-                                                                        class="dropdown-item d-flex align-items-center text-center text-danger"
-                                                                        id="reportPostBtn">
-                                                                        Report post
-                                                                    </button>
-                                                                </li>
+                                                                @include('../partials.report_form', [
+                                                                    'reportable' => $post,
+                                                                ])
                                                             @endif
                                                         </ul>
                                                     </div>

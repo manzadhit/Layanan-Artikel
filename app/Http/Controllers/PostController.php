@@ -5,14 +5,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Like;
 use App\Models\Post;
+use App\Models\User;
+use App\Models\Report;
 use App\Models\Comment;
 use App\Models\Category;
 use App\Models\PostImage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\NewPostNotification;
+use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\DatabaseNotification;
 
 class PostController extends Controller
 {
@@ -40,6 +46,12 @@ class PostController extends Controller
         $this->processImages($post, $request->content);
 
         $post->categories()->sync($request->categories);
+
+        // Kirim notifikasi kepada admin
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new NewPostNotification($post));
+        }
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
@@ -216,6 +228,28 @@ class PostController extends Controller
                 $this->removeImage($image->image_name);
                 $image->delete();
             }
+        }
+
+        // Hapus notifikasi terkait dengan post
+        DatabaseNotification::where('data->reportable_id', (string) $post->id)
+            ->where('data->reportable_type', 'App\\Models\\Post')
+            ->delete();
+
+        // Hapus laporan terkait dengan post
+        Report::where('reportable_id', $post->id)
+            ->where('reportable_type', 'App\\Models\\Post')
+            ->delete();
+
+        // Hapus notifikasi dan laporan terkait dengan komentar di post ini
+        $comments = $post->comments;
+        foreach ($comments as $comment) {
+            DatabaseNotification::where('data->reportable_id', (string) $comment->id)
+                ->where('data->reportable_type', 'App\\Models\\Comment')
+                ->delete();
+
+            Report::where('reportable_id', $comment->id)
+                ->where('reportable_type', 'App\\Models\\Comment')
+                ->delete();
         }
 
         // Hapus post
