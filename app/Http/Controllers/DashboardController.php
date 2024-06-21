@@ -99,7 +99,7 @@ class DashboardController extends Controller
                 ->delete();
 
             // Hapus semua notifikasi yang memiliki user_id terkait
-            DatabaseNotification::where('data->user_id', (string) $user->id)
+            DatabaseNotification::where('data->user_id', $user->id)
                 ->delete();
 
             // Hapus laporan yang terkait dengan user secara langsung
@@ -135,7 +135,7 @@ class DashboardController extends Controller
             // Hapus user
             $user->delete();
 
-            return redirect()->back()->with('success', 'User deleted successfully.');
+            return redirect()->route('dashboard', ['type' => 'users'])->with('success', 'User deleted successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to delete user.');
         }
