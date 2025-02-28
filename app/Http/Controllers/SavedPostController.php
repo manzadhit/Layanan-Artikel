@@ -29,8 +29,10 @@ class SavedPostController extends Controller
                 'user_id' => $userId,
             ]);
 
-            // Kirim notifikasi ke penulis posting
-            $post->user->notify(new PostSaved(Auth::user(), $post));
+            if($userId != $post->user_id) {
+                // Kirim notifikasi ke penulis posting
+                $post->user->notify(new PostSaved(Auth::user(), $post));
+            }
 
             $status = 'saved';
         }
