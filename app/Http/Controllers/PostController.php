@@ -214,7 +214,6 @@ class PostController extends Controller
         }
     }
 
-
     public function destroy($slug)
     {
         $post = Post::where('slug', $slug)->firstOrFail();
@@ -269,10 +268,6 @@ class PostController extends Controller
         // Jika tidak, redirect ke URL sebelumnya
         return redirect()->back()->with('success', 'Post dan gambar terkait berhasil dihapus.');
     }
-
-
-
-
 
     private function removeUnusedImages($oldContent, $newContent)
     {
