@@ -229,13 +229,14 @@ class PostController extends Controller
             }
         }
 
-        // Hapus notifikasi terkait dengan post
-        DatabaseNotification::where('data->>reportable_id', (string) $post->id)
-            ->where('data->>reportable_type', 'App\\Models\\Post')
+
+        DatabaseNotification::whereRaw("data::jsonb->>'reportable_id' = ?", [(string) $post->id])
+            ->whereRaw("data::jsonb->>'reportable_type' = 'App\\Models\\Post'")
             ->delete();
 
-        DatabaseNotification::where('data->>post_id', (string) $post->id)
+        DatabaseNotification::whereRaw("data::jsonb->>'post_id' = ?", [(string) $post->id])
             ->delete();
+
 
         // Hapus laporan terkait dengan post
         Report::where('reportable_id', $post->id)
