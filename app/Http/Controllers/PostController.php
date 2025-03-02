@@ -230,13 +230,15 @@ class PostController extends Controller
             }
         }
 
-        // Hapus notifikasi terkait dengan post
-        DatabaseNotification::where('data->reportable_id', (string) $post->id)
-            ->where('data->reportable_type', 'App\\Models\\Post')
+        // Hapus notifikasi terkait dengan post (dengan type casting)
+        DatabaseNotification::whereRaw(
+            "data->>'reportable_id' = ? AND data->>'reportable_type' = ?",
+            [(string) $post->id, 'App\\Models\\Post']
+        )
             ->delete();
 
-        DatabaseNotification::where('data->post_id', $post->id)
-        ->delete();
+        DatabaseNotification::whereRaw("data->>'post_id' = ?", [(string) $post->id])
+            ->delete();
 
         // Hapus laporan terkait dengan post
         Report::where('reportable_id', $post->id)
@@ -244,10 +246,11 @@ class PostController extends Controller
             ->delete();
 
         // Hapus notifikasi dan laporan terkait dengan komentar di post ini
-        $comments = $post->comments;
-        foreach ($comments as $comment) {
-            DatabaseNotification::where('data->reportable_id', (string) $comment->id)
-                ->where('data->reportable_type', 'App\\Models\\Comment')
+        foreach ($post->comments as $comment) {
+            DatabaseNotification::whereRaw(
+                "data->>'reportable_id' = ? AND data->>'reportable_type' = ?",
+                [(string) $comment->id, 'App\\Models\\Comment']
+            )
                 ->delete();
 
             Report::where('reportable_id', $comment->id)
@@ -258,17 +261,15 @@ class PostController extends Controller
         // Hapus post
         $post->delete();
 
-        // Cek URL sebelumnya
+        // Redirect sesuai URL sebelumnya
         $previousUrl = url()->previous();
-
-        // Jika URL sebelumnya adalah /posts/slug, redirect ke /
         if (parse_url($previousUrl, PHP_URL_PATH) == "/posts/$slug") {
             return redirect('/')->with('success', 'Post dan gambar terkait berhasil dihapus.');
         }
 
-        // Jika tidak, redirect ke URL sebelumnya
         return redirect()->back()->with('success', 'Post dan gambar terkait berhasil dihapus.');
     }
+
 
 
 

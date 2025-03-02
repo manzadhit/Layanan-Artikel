@@ -191,9 +191,9 @@
                                                                 <button type="button" id="followBtn"
                                                                     class="follow-btn dropdown-item d-flex align-items-center text-center text"
                                                                     style="cursor: pointer;"
-                                                                    data-following="{{ auth()->user()->isFollowing($post->user)? 'true': 'false' }}"
+                                                                    data-following="{{ auth()->user()->isFollowing($post->user) ? 'true' : 'false' }}"
                                                                     data-user-id="{{ $post->user->id }}">
-                                                                    {{ auth()->user()->isFollowing($post->user)? 'Unfollow author': 'Follow author' }}
+                                                                    {{ auth()->user()->isFollowing($post->user) ? 'Unfollow author' : 'Follow author' }}
                                                                 </button>
                                                             </form>
                                                         </li>
