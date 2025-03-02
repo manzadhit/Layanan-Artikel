@@ -230,14 +230,12 @@ class PostController extends Controller
             }
         }
 
-        // Hapus notifikasi terkait dengan post (dengan type casting)
-        DatabaseNotification::whereRaw(
-            "data->>'reportable_id' = ? AND data->>'reportable_type' = ?",
-            [(string) $post->id, 'App\\Models\\Post']
-        )
+        // Hapus notifikasi terkait dengan post
+        DatabaseNotification::where('data->>reportable_id', (string) $post->id)
+            ->where('data->>reportable_type', 'App\\Models\\Post')
             ->delete();
 
-        DatabaseNotification::whereRaw("data->>'post_id' = ?", [(string) $post->id])
+        DatabaseNotification::where('data->>post_id', (string) $post->id)
             ->delete();
 
         // Hapus laporan terkait dengan post
@@ -246,11 +244,10 @@ class PostController extends Controller
             ->delete();
 
         // Hapus notifikasi dan laporan terkait dengan komentar di post ini
-        foreach ($post->comments as $comment) {
-            DatabaseNotification::whereRaw(
-                "data->>'reportable_id' = ? AND data->>'reportable_type' = ?",
-                [(string) $comment->id, 'App\\Models\\Comment']
-            )
+        $comments = $post->comments;
+        foreach ($comments as $comment) {
+            DatabaseNotification::where('data->>reportable_id', (string) $comment->id)
+                ->where('data->>reportable_type', 'App\\Models\\Comment')
                 ->delete();
 
             Report::where('reportable_id', $comment->id)
@@ -261,12 +258,15 @@ class PostController extends Controller
         // Hapus post
         $post->delete();
 
-        // Redirect sesuai URL sebelumnya
+        // Cek URL sebelumnya
         $previousUrl = url()->previous();
+
+        // Jika URL sebelumnya adalah /posts/slug, redirect ke /
         if (parse_url($previousUrl, PHP_URL_PATH) == "/posts/$slug") {
             return redirect('/')->with('success', 'Post dan gambar terkait berhasil dihapus.');
         }
 
+        // Jika tidak, redirect ke URL sebelumnya
         return redirect()->back()->with('success', 'Post dan gambar terkait berhasil dihapus.');
     }
 
